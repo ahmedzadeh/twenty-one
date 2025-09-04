@@ -222,7 +222,12 @@
 
       <div class="menu-row">
         <strong id="winsLabel">Побед до матча:</strong>
-        <input id="winTarget" class="spin" type="number" min="1" max="5" value="3">
+        <select id="winTarget" class="spin">
+          <option value="2">2</option>
+          <option value="3" selected>3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
       </div>
 
       <div class="menu-row">
@@ -556,11 +561,10 @@
 
   // ---------- валидатор цели матча ----------
   function ensureWinTarget(){
-    let v = parseInt(winInput.value, 10);
-    if(!Number.isFinite(v) || v < 1) v = 3;
-    if(v > 5) v = 5;            // максимум 5
-    winTarget = v;
-    winInput.value = String(v);
+    const v = parseInt(winInput.value, 10);
+    winTarget = [2,3,4,5].includes(v) ? v : 3;  // допустим только 2..5
+    winInput.value = String(winTarget);
+    winInput.addEventListener('change', ()=>{ ensureWinTarget(); drawChips(); });
   }
 
   // ---------- раунд ----------
@@ -820,5 +824,6 @@
 </script>
 </body>
 </html>
+
 
 
