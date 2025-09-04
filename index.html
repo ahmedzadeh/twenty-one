@@ -115,7 +115,7 @@
   #postSummary{text-align:center;margin:-2px 0 8px;color:#ddd;font-weight:700}
 
   /* Меню */
-  #menuOverlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center}
+  #menuOverlay{position:fixed; inset:0; background:rgba(0,0,0,.75);display:flex; align-items:center; justify-content:center;z-index:2000;}
   #menu{width:min(560px,92%);padding:16px 18px}
   .menu-title{font-size:24px;color:var(--accent);font-weight:900;text-align:center;margin:6px 0}
   .menu-sub{opacity:.9;text-align:center;margin-bottom:10px}
@@ -126,7 +126,7 @@
   select, .chk{background:#1f1f1f;border:1px solid #666;color:#fff;border-radius:10px;padding:6px 8px}
 
   /* Модалка конца матча */
-  #resultOverlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;z-index:50}
+  #resultOverlay{position:fixed; inset:0; background:rgba(0,0,0,.65);display:none; align-items:center; justify-content:center;z-index:3000;}
   #resultModal{background:var(--panel);border:1px solid #444;border-radius:14px;padding:16px 18px;
                width:min(420px,92%);box-shadow:0 12px 32px rgba(0,0,0,.4);text-align:center}
   #resultModal h3{margin:6px 0 8px;color:var(--accent);animation:pop .5s ease}
@@ -142,7 +142,7 @@
   @media (max-width:560px){
     .wrap{padding:10px}
     #table{padding:18px}
-    .btn-row{position:sticky;bottom:10px;z-index:5}
+    .btn-row{position:sticky;bottom:10px;z-index:2}
     .cards{gap:10px}
     .total{position:static;transform:none;margin-top:6px}
     #toast{bottom:110px}
@@ -820,4 +820,5 @@
 </script>
 </body>
 </html>
+
 
