@@ -1,0 +1,824 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Игра 21 — браузерная версия</title>
+
+  <!-- ИКОНКИ -->
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#106b2e">
+  <!-- /ИКОНКИ -->
+
+
+<style>
+  :root{
+    --bg:#222; --panel:#2b2b2b; --table:#106b2e; --text:#fff; --accent:#ffd54f;
+    --chip-green:#2ecc71; --chip-red:#e74c3c; --muted:#bbb; --danger:#ef5350; --good:#9CCC65; --win:#00e676;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 "Segoe UI",system-ui,Arial,sans-serif}
+  .wrap{max-width:1000px;margin:0 auto;padding:16px}
+
+  /* Панели */
+  .panel{background:var(--panel);border:1px solid #444;border-radius:14px;box-shadow:0 6px 14px rgba(0,0,0,.25)}
+  #scorePanel{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 14px;margin:8px auto}
+
+  #chips{display:flex;align-items:center;gap:22px}
+  .chips{display:flex;gap:8px}
+  .chip{width:12px;height:12px;border-radius:50%;background:#555;transition:transform .15s ease}
+  .chip.active{transform:scale(1.05)}
+  .chip.green.active{background:var(--chip-green)}
+  .chip.red.active{background:var(--chip-red)}
+  .chip.win{animation:pop .35s ease}
+  @keyframes pop{from{transform:scale(.7)}to{transform:scale(1.05)}}
+
+  .menu-btn{position:absolute;left:20px;top:18px;background:#444;color:#fff;border:none;border-radius:10px;padding:6px 10px;font-weight:700;cursor:pointer}
+  .menu-btn:active{transform:translateY(1px)}
+
+  /* Стол */
+  #table{position:relative;background:var(--table);border-radius:16px;padding:26px;margin-top:12px}
+  h1{margin:0 0 8px;text-align:center;color:var(--accent)}
+  /* мини-колода для анимации */
+  #deckStub{
+    position:absolute; left:18px; top:18px; width:56px; height:78px;
+    border-radius:10px; border:2px dashed #111; opacity:.45; box-shadow:2px 2px 0 #111;
+    background:repeating-linear-gradient(45deg,#ffffff08 0 6px,#ffffff16 6px 12px);
+  }
+  .hand{margin-top:26px;position:relative;display:flex;flex-direction:column;align-items:center}
+  .hand .who{color:var(--accent);font-weight:800;margin-bottom:8px}
+  .cards{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+  .total{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-weight:800}
+  .badge{display:inline-block;padding:4px 10px;border-radius:999px;background:#1f1f1f;color:var(--accent);
+         font-weight:800;border:1px solid #444;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+  .badge.good{color:var(--good)} .badge.win{color:var(--win)} .badge.bad{color:var(--danger)}
+
+  /* Баблы */
+  .bubble{position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+          background:#1f1f1f;border:1px solid #444;color:#fff;padding:6px 10px;border-radius:12px;
+          font-weight:800;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s; z-index:20;}
+  .bubble.show{opacity:1;transform:translate(-50%,-4px)}
+
+  /* Карты */
+  .card{position:relative;width:56px;height:78px;background:#fff;border-radius:10px;border:2px solid #111;
+        box-shadow:2px 2px 0 #111;display:flex;align-items:center;justify-content:center;font-weight:800;
+        transition:transform .22s ease, opacity .22s ease}
+  .card.grey{background:#e6e6e6}
+  .card.red{color:#e53935} .card.black{color:#111}
+  .card .corner{position:absolute;font-size:14px}
+  .card .tl{left:6px;top:6px} .card .br{right:6px;bottom:6px}
+  .card .value{font-size:18px}
+  .card.enter{transform:translateY(-14px);opacity:0}
+  .card.flash{animation:flash .45s ease}
+  .card .pill{position:absolute;right:-8px;top:-8px;background:#222;color:#ffd54f;
+              border:1px solid #444;border-radius:999px;padding:2px 6px;font-size:12px;font-weight:900}
+  @keyframes flash{0%{box-shadow:0 0 0 0 rgba(255,255,255,.6)}100%{box-shadow:2px 2px 0 #111}}
+
+  /* летящая карта */
+  .card.fly{position:fixed; z-index:40; left:0; top:0; transform:translate(0,0) scale(.92); transition:transform .32s ease; pointer-events:none}
+
+  /* Тоасты */
+  #toast{
+    position:absolute; left:50%; bottom:90px; transform:translateX(-50%);
+    pointer-events:none; display:flex; flex-direction:column; gap:8px; align-items:center; z-index:30;
+  }
+  .toast{
+    background:#000c;color:#fff;padding:8px 12px;border-radius:10px;font-weight:800;border:1px solid #444;
+    opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;box-shadow:0 8px 18px rgba(0,0,0,.35)
+  }
+  .toast.show{opacity:1;transform:translateY(0)}
+  .toast.win{color:#00e676} .toast.lose{color:#ef5350} .toast.info{color:#ffd54f}
+
+  /* Кнопки */
+  .btn-row{display:flex;justify-content:center;gap:12px;margin-top:12px}
+  .btn{background:#333;color:#fff;border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;min-height:44px;letter-spacing:.2px;box-shadow:0 4px 0 #222}
+  .btn:active{transform:translateY(1px);box-shadow:0 3px 0 #222}
+  .btn:focus-visible{outline:3px solid var(--win);outline-offset:2px;border-radius:12px}
+  .btn[disabled]{opacity:.55;cursor:not-allowed}
+
+  /* Статус */
+  #status{text-align:center;color:var(--muted);margin-top:8px}
+  #status.thinking::after{
+    content:"";display:inline-block;width:36px;height:10px;margin-left:6px;--c:#bbb;
+    background:radial-gradient(var(--c) 2px,transparent 3px) 0 50%/12px 10px repeat-x;
+    animation:dots 1s steps(3,end) infinite;
+  }
+  #status.ok{color:#00e676} #status.bad{color:#ef5350} #status.neutral{color:#bbb}
+  @keyframes dots{from{background-position:0 50%}to{background-position:-36px 50%}}
+
+  /* Пост-панель */
+  #postPanel{display:none;margin:10px auto 0;padding:10px 12px;max-width:520px}
+  #postPanel .row{display:flex;gap:10px;justify-content:center}
+  #postSummary{text-align:center;margin:-2px 0 8px;color:#ddd;font-weight:700}
+
+  /* Меню */
+  #menuOverlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center}
+  #menu{width:min(560px,92%);padding:16px 18px}
+  .menu-title{font-size:24px;color:var(--accent);font-weight:900;text-align:center;margin:6px 0}
+  .menu-sub{opacity:.9;text-align:center;margin-bottom:10px}
+  .menu-row{display:flex;align-items:center;gap:12px;margin:8px 0;justify-content:center;flex-wrap:wrap}
+  .menu-btns{display:flex;gap:10px;justify-content:center;margin-top:10px}
+  .spin{width:70px;padding:6px 8px;border-radius:10px;border:1px solid #666;background:#1f1f1f;color:#fff}
+  label{cursor:pointer}
+  select, .chk{background:#1f1f1f;border:1px solid #666;color:#fff;border-radius:10px;padding:6px 8px}
+
+  /* Модалка конца матча */
+  #resultOverlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;z-index:50}
+  #resultModal{background:var(--panel);border:1px solid #444;border-radius:14px;padding:16px 18px;
+               width:min(420px,92%);box-shadow:0 12px 32px rgba(0,0,0,.4);text-align:center}
+  #resultModal h3{margin:6px 0 8px;color:var(--accent);animation:pop .5s ease}
+  #resultModal p{margin:0 0 12px;color:#ddd}
+  #resultModal .row{display:flex;gap:10px;justify-content:center}
+  #okBtn{background:#2e7d32}
+  @keyframes pop{from{transform:scale(.9);opacity:.6}to{transform:scale(1);opacity:1}}
+
+  /* Футер */
+  footer{max-width:900px;margin:12px auto 20px;color:#999;text-align:center;font-size:14px}
+
+  /* Адаптив */
+  @media (max-width:560px){
+    .wrap{padding:10px}
+    #table{padding:18px}
+    .btn-row{position:sticky;bottom:10px;z-index:5}
+    .cards{gap:10px}
+    .total{position:static;transform:none;margin-top:6px}
+    #toast{bottom:110px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <button id="menuBtn" class="menu-btn">≡ Меню</button>
+
+    <div id="scorePanel" class="panel" aria-live="polite">
+      <div id="scoreLabel" style="color:var(--accent);font-weight:900;">Счёт</div>
+      <div id="scoreText" style="font-weight:800;">Ты 0 - 0 Бот</div>
+      <div id="chips">
+        <div id="chipsL" class="chips"></div>
+        <div style="opacity:.9">vs</div>
+        <div id="chipsR" class="chips"></div>
+      </div>
+    </div>
+
+    <section id="table" class="panel" aria-label="Игровой стол">
+      <h1 id="titleGame">Игра 21</h1>
+      <div id="deckStub" aria-hidden="true"></div>
+
+      <!-- Тоасты -->
+      <div id="toast"></div>
+
+      <div class="hand" id="handPlayer">
+        <div id="whoPlayer" class="who">Игрок</div>
+        <div class="bubble" id="bubblePlayer"></div>
+        <div class="cards" id="cardsPlayer"></div>
+        <div class="total" id="totalPlayer"><span class="badge">= 0</span></div>
+      </div>
+
+      <div class="hand" id="handBot">
+        <div id="whoBot" class="who">Бот</div>
+        <div class="bubble" id="bubbleBot"></div>
+        <div class="cards" id="cardsBot"></div>
+        <div class="total" id="totalBot"><span class="badge">= 0</span></div>
+      </div>
+
+      <div class="btn-row">
+        <button id="hitBtn"  class="btn">🃏 Взять карту</button>
+        <button id="stopBtn" class="btn">✋ Стоп</button>
+      </div>
+
+      <div id="status">Готово</div>
+    </section>
+
+    <div id="postPanel" class="panel">
+      <div id="postTitle" style="text-align:center;font-weight:800;margin-bottom:8px">Раунд завершён</div>
+      <div id="postSummary"></div>
+      <div class="row">
+        <button id="nextBtn"  class="btn">👉 Следующий раунд</button>
+        <button id="resetBtn" class="btn">🔄 В меню</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>by Huseyn Ahmedzade • ©</footer>
+
+  <!-- Главное меню -->
+  <div id="menuOverlay">
+    <div id="menu" class="panel">
+      <div id="menuTitle" class="menu-title">Игра 21</div>
+      <div id="menuSub" class="menu-sub">Выбери правила и начни матч</div>
+
+      <div class="menu-row">
+        <strong id="diffLabel">Сложность:</strong>
+        <label><input type="radio" name="diff" value="easy"> <span id="diffEasy">Лёгкая</span></label>
+        <label><input type="radio" name="diff" value="normal" checked> <span id="diffNormal">Обычная</span></label>
+        <label><input type="radio" name="diff" value="hard"> <span id="diffHard">Сложная</span></label>
+      </div>
+
+      <div class="menu-row">
+        <strong id="winsLabel">Побед до матча:</strong>
+        <input id="winTarget" class="spin" type="number" min="1" max="5" value="3">
+      </div>
+
+      <div class="menu-row">
+        <label class="chk"><input type="checkbox" id="sfxToggle" checked> <span id="sfxLabel">Звук</span></label>
+        <label class="chk"><input type="checkbox" id="vibToggle" checked> <span id="vibLabel">Вибрация</span></label>
+        <label>
+          <select id="langSelect">
+            <option value="ru">Русский</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="menu-btns">
+        <button id="startBtn" class="btn" style="background:#3d7a3d">▶ Начать матч</button>
+        <button id="rulesBtn" class="btn">📜 Правила</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно конца матча -->
+  <div id="resultOverlay">
+    <div id="resultModal">
+      <h3 id="modalTitle">Матч окончен</h3>
+      <p id="modalText">Сообщение</p>
+      <div class="row">
+        <button id="okBtn" class="btn">ОК</button>
+        <button id="toMenuBtn" class="btn">В меню</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  // ---------- локализация ----------
+  const i18n = {
+    ru:{
+      score:'Счёт', game21:'Игра 21', player:'Игрок', bot:'Бот',
+      hit:'Взять карту', stop:'Стоп', yourTurn:'Твой ход', botThinking:'Бот думает…',
+      roundOver:'Раунд завершён', nextRound:'Следующий раунд', toMenu:'В меню',
+      newRound:'🎮 Новый раунд!',
+      deckEmptyYou:'🪙 Колода пуста! Ты не можешь взять карту.',
+      deckEmptyBot:'🪙 Колода пуста! Бот не может взять карту.',
+      youSaidStop:'Ты сказал: Стоп', botSaidStop:'Бот сказал: Стоп',
+      youBust:'У тебя перебор. Бот выиграл раунд', botBust:'У бота перебор. Ты выиграл раунд',
+      matchOver:'Матч окончен',
+      youWonMatch:'🏆 Ты выиграл матч! Итог: {ps} : {bs}',
+      botWonMatch:'💀 Бот победил в матче! Итог: {bs} : {ps}',
+      scoring:'Подсчёт очков…',
+      menuTitle:'Игра 21', menuSub:'Выбери правила и начни матч',
+      difficulty:'Сложность:', easy:'Лёгкая', normal:'Обычная', hard:'Сложная',
+      winsToWin:'Побед до матча:', sound:'Звук', vib:'Вибрация',
+      ok:'ОК', rules:'Правила', start:'Начать матч'
+    },
+    en:{
+      score:'Score', game21:'Twenty-One', player:'Player', bot:'Bot',
+      hit:'Hit', stop:'Stand', yourTurn:'Your move', botThinking:'Bot is thinking…',
+      roundOver:'Round finished', nextRound:'Next round', toMenu:'Menu',
+      newRound:'🎮 New round!',
+      deckEmptyYou:'🪙 Deck is empty! You cannot draw.',
+      deckEmptyBot:'🪙 Deck is empty! Bot cannot draw.',
+      youSaidStop:'You said: Stand', botSaidStop:'Bot said: Stand',
+      youBust:'You busted. Bot wins the round', botBust:'Bot busted. You win the round',
+      matchOver:'Match finished',
+      youWonMatch:'🏆 You won the match! Final: {ps} : {bs}',
+      botWonMatch:'💀 Bot won the match! Final: {bs} : {ps}',
+      scoring:'Scoring…',
+      menuTitle:'Twenty-One', menuSub:'Pick options and start',
+      difficulty:'Difficulty:', easy:'Easy', normal:'Normal', hard:'Hard',
+      winsToWin:'Wins to win:', sound:'Sound', vib:'Vibration',
+      ok:'OK', rules:'Rules', start:'Start match'
+    }
+  };
+  let lang = localStorage.lang || 'ru';
+  const t = (k, vars={})=>{
+    const raw = (i18n[lang]&&i18n[lang][k]) || i18n.ru[k] || k;
+    return raw.replace('{ps}', vars.ps??'').replace('{bs}', vars.bs??'');
+  };
+  function applyLang(){
+    document.getElementById('scoreLabel').textContent = t('score');
+    document.getElementById('titleGame').textContent  = t('game21');
+    document.getElementById('whoPlayer').textContent  = t('player');
+    document.getElementById('whoBot').textContent     = t('bot');
+    document.getElementById('hitBtn').textContent     = '🃏 ' + t('hit');
+    document.getElementById('stopBtn').textContent    = '✋ ' + t('stop');
+    document.getElementById('postTitle').textContent  = t('roundOver');
+    document.getElementById('nextBtn').textContent    = '👉 ' + t('nextRound');
+    document.getElementById('resetBtn').textContent   = '🔄 ' + t('toMenu');
+    document.getElementById('menuTitle').textContent  = t('menuTitle');
+    document.getElementById('menuSub').textContent    = t('menuSub');
+    document.getElementById('diffLabel').textContent  = t('difficulty');
+    document.getElementById('diffEasy').textContent   = t('easy');
+    document.getElementById('diffNormal').textContent = t('normal');
+    document.getElementById('diffHard').textContent   = t('hard');
+    document.getElementById('winsLabel').textContent  = t('winsToWin');
+    document.getElementById('sfxLabel').textContent   = t('sound');
+    document.getElementById('vibLabel').textContent   = t('vib');
+    document.getElementById('startBtn').textContent   = '▶ ' + t('start');
+    document.getElementById('rulesBtn').textContent   = '📜 ' + t('rules');
+    document.getElementById('okBtn').textContent      = t('ok');
+    document.getElementById('toMenuBtn').textContent  = t('toMenu');
+    statusEl.textContent = t('yourTurn');
+  }
+
+  // ---------- состояние ----------
+  let deck = [];
+  let player = [];
+  let bot = [];
+  let playerStop = false;
+  let botStop = false;
+  let roundOver = false;
+  let phase = 'player';          // 'player' | 'bot'
+  let animLock = false;
+  let difficulty = 'normal';
+  let winTarget = 3;             // максимум 5
+  let playerScore = 0;
+  let botScore = 0;
+
+  // звук/вибрация
+  let sfxOn = localStorage.sfxOn ? localStorage.sfxOn==='1' : true;
+  let vibOn = localStorage.vibOn ? localStorage.vibOn==='1' : true;
+  let actx = null;
+  function ensureAudio(){ if(!actx){ const C=window.AudioContext||window.webkitAudioContext; actx=new C(); } if(actx.state==='suspended') actx.resume(); }
+  function tone(freq=440, dur=0.12, type='sine', vol=0.05){
+    if(!sfxOn) return;
+    ensureAudio();
+    const o=actx.createOscillator(), g=actx.createGain();
+    o.type=type; o.frequency.value=freq; o.connect(g); g.connect(actx.destination);
+    const t0=actx.currentTime; g.gain.setValueAtTime(0.0001,t0);
+    g.gain.linearRampToValueAtTime(vol,t0+0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+    o.start(); o.stop(t0+dur);
+  }
+  function playSfx(kind){
+    switch(kind){
+      case 'deal': tone(660,0.08,'triangle',0.03); break;
+      case 'click': tone(520,0.06,'square',0.04); break;
+      case 'stop': tone(340,0.08,'square',0.03); break;
+      case 'win': tone(880,0.12,'triangle',0.05); setTimeout(()=>tone(1046,0.14,'triangle',0.05),100); break;
+      case 'lose': tone(220,0.18,'sawtooth',0.06); break;
+      case 'bust': tone(160,0.22,'sawtooth',0.06); break;
+    }
+  }
+  function buzz(ms=50){ if(vibOn && navigator.vibrate) navigator.vibrate(ms); }
+
+  // ---------- DOM ----------
+  const menuOverlay = document.getElementById('menuOverlay');
+  const startBtn = document.getElementById('startBtn');
+  const rulesBtn = document.getElementById('rulesBtn');
+  const menuBtn = document.getElementById('menuBtn');
+  const winInput = document.getElementById('winTarget');
+  const langSelect = document.getElementById('langSelect');
+  const sfxToggle = document.getElementById('sfxToggle');
+  const vibToggle = document.getElementById('vibToggle');
+
+  const scoreText = document.getElementById('scoreText');
+  const chipsL = document.getElementById('chipsL');
+  const chipsR = document.getElementById('chipsR');
+
+  const cardsPlayer = document.getElementById('cardsPlayer');
+  const cardsBot = document.getElementById('cardsBot');
+  const totalPlayer = document.getElementById('totalPlayer');
+  const totalBot = document.getElementById('totalBot');
+
+  const bubblePlayer = document.getElementById('bubblePlayer');
+  const bubbleBot = document.getElementById('bubbleBot');
+
+  const hitBtn = document.getElementById('hitBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const statusEl = document.getElementById('status');
+
+  const postPanel = document.getElementById('postPanel');
+  const postSummary = document.getElementById('postSummary');
+  const nextBtn = document.getElementById('nextBtn');
+  const resetBtn = document.getElementById('resetBtn');
+
+  const deckStub = document.getElementById('deckStub');
+
+  // модалка конца матча
+  const resultOverlay = document.getElementById('resultOverlay');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalText  = document.getElementById('modalText');
+  const okBtn      = document.getElementById('okBtn');
+  const toMenuBtn  = document.getElementById('toMenuBtn');
+
+  // ---------- утилиты/колода ----------
+  const rng = arr => arr[Math.floor(Math.random()*arr.length)];
+  const sum = a => a.reduce((s,x)=>s+x,0);
+  const newDeck = () => Array.from({length:11}, (_,i)=>i+1);
+
+  function dealStart(d){
+    let tries=0;
+    while(true){
+      const a = rng(d), b = rng(d);
+      if(a!==b && a+b<=11){
+        d.splice(d.indexOf(a),1);
+        d.splice(d.indexOf(b),1);
+        return [a,b];
+      }
+      if(++tries>200){
+        return [getCard(d), getCard(d)];
+      }
+    }
+  }
+  function getCard(d){
+    if(d.length===0) return null;
+    const i = Math.floor(Math.random()*d.length);
+    return d.splice(i,1)[0];
+  }
+
+  // вероятность перебора для бота (улучшение #4)
+  function bustProb(total, d){
+    const need = 22 - total;
+    if(need<=1) return 1;               // любая карта — перебор
+    const bad = d.filter(v=>v>=need).length;
+    return d.length ? bad/d.length : 1;
+  }
+  function botDecision(total, d){
+    if(total >= 20) return 'stop';
+    if(total <= 15) return 'hit';
+    const p = bustProb(total, d);
+    const risk = (difficulty==='easy'? 0.25 : difficulty==='hard'? 0.55 : 0.40);
+    return (p < risk) ? 'hit' : 'stop';
+  }
+
+  // ---------- карточки + анимация (#3) ----------
+  const SUITS = [
+    {sym:'♠', color:'black'},
+    {sym:'♥', color:'red'},
+    {sym:'♣', color:'black'},
+    {sym:'♦', color:'red'}
+  ];
+  function suitFor(value){ return SUITS[(value-1)%4]; }
+
+  function makeCardEl(value, owner){
+    const s = suitFor(value);
+    const card = document.createElement('div');
+    card.className = 'card ' + (owner==='player' ? '' : 'grey') + ' ' + (s.color==='red'?'red':'black') + ' enter';
+    card.innerHTML = `
+      <div class="corner tl">${s.sym}</div>
+      <div class="value">${value}</div>
+      <div class="corner br">${s.sym}</div>
+    `;
+    requestAnimationFrame(()=>card.classList.remove('enter'));
+    return card;
+  }
+
+  function cls(t){ return t>21?'bad':t===21?'win':t>=17?'good':'' }
+  function renderTotals(){
+    const pt = sum(player), bt = sum(bot);
+    totalPlayer.innerHTML = `<span class="badge ${cls(pt)}">= ${pt}</span>`;
+    totalBot.innerHTML    = `<span class="badge ${cls(bt)}">= ${bt}</span>`;
+  }
+
+  // с анимацией из колоды
+  function addCardToDOM(owner, value){
+    const cont = owner==='player'?cardsPlayer:cardsBot;
+
+    // летающая карта
+    const fly = makeCardEl(value, owner);
+    fly.classList.add('fly');
+    document.body.appendChild(fly);
+
+    const deckRect = deckStub.getBoundingClientRect();
+    const targetRect = cont.getBoundingClientRect();
+    fly.style.left = deckRect.left + 'px';
+    fly.style.top  = deckRect.top  + 'px';
+
+    // цель — приблизительный центр контейнера
+    const dx = (targetRect.left + targetRect.width/2) - deckRect.left - 28;
+    const dy = (targetRect.top  + 8) - deckRect.top - 39;
+
+    requestAnimationFrame(()=>{ fly.style.transform = `translate(${dx}px, ${dy}px) scale(1)`; });
+
+    setTimeout(()=>{
+      fly.remove();
+
+      // финальная карта в контейнере
+      const el = makeCardEl(value, owner);
+      cont.appendChild(el);
+      el.classList.add('flash');
+      const pill = document.createElement('span');
+      pill.className='pill'; pill.textContent = `+${value}`;
+      el.appendChild(pill);
+      setTimeout(()=>{ el.classList.remove('flash'); pill.remove(); }, 450);
+
+      renderTotals();
+      playSfx('deal');
+    }, 340);
+  }
+
+  // ---------- баблы + тоасты ----------
+  function bubble(owner, text){
+    const b = owner==='player'? bubblePlayer : bubbleBot;
+    b.textContent = text; b.classList.add('show');
+    setTimeout(()=>b.classList.remove('show'), 1000);
+  }
+
+  let toastQueue = []; let toastActive = false;
+  function showToast(text, type='info', duration=1000){
+    toastQueue.push({text, type, duration});
+    if (!toastActive) runToast();
+  }
+  function runToast(){
+    const zone = document.getElementById('toast');
+    const item = toastQueue.shift();
+    if (!item){ toastActive = false; return; }
+    toastActive = true;
+    zone.innerHTML = `<div class="toast ${item.type} show">${item.text}</div>`;
+    setTimeout(() => {
+      zone.firstChild?.classList.remove('show');
+      setTimeout(() => { zone.innerHTML = ''; runToast(); }, 280);
+    }, item.duration);
+  }
+
+  // ---------- счёт ----------
+  function drawChips(){
+    scoreText.textContent = (lang==='ru' ? `Ты ${playerScore} - ${botScore} Бот`
+                                          : `You ${playerScore} - ${botScore} Bot`);
+    const draw = (el, n, activeClass) => {
+      el.innerHTML = '';
+      for(let i=0;i<winTarget;i++){
+        const c = document.createElement('span');
+        c.className = 'chip ' + activeClass + (i<n ? ' active' : '');
+        el.appendChild(c);
+      }
+    };
+    draw(chipsL, playerScore, 'green');
+    draw(chipsR, botScore, 'red');
+  }
+
+  // ---------- валидатор цели матча ----------
+  function ensureWinTarget(){
+    let v = parseInt(winInput.value, 10);
+    if(!Number.isFinite(v) || v < 1) v = 3;
+    if(v > 5) v = 5;            // максимум 5
+    winTarget = v;
+    winInput.value = String(v);
+  }
+
+  // ---------- раунд ----------
+  function startRound(){
+    deck = newDeck();
+    player = dealStart(deck);
+    bot = dealStart(deck);
+    playerStop = botStop = roundOver = false;
+    phase = 'player';
+    animLock = false;
+
+    cardsPlayer.innerHTML = ''; cardsBot.innerHTML='';
+    player.forEach(v=>cardsPlayer.appendChild(makeCardEl(v,'player')));
+    bot.forEach(v=>cardsBot.appendChild(makeCardEl(v,'bot')));
+    renderTotals();
+
+    statusEl.textContent = t('yourTurn');
+    statusEl.className = '';
+    postPanel.style.display = 'none';
+    hitBtn.disabled = false; stopBtn.disabled = false;
+
+    showToast(t('newRound'),'info');
+  }
+
+  function checkEnd(){
+    if(playerStop && botStop && !roundOver){
+      const ps = sum(player), bs = sum(bot);
+      if(ps>bs){ endRound('player'); }
+      else if(ps<bs){ endRound('bot'); }
+      else { endRound('draw'); }
+      return true;
+    }
+    return false;
+  }
+
+  // ---------- модалка конца матча ----------
+  function showMatchEndModal(text){
+    modalTitle.textContent = t('matchOver');
+    modalText.textContent  = text;
+    resultOverlay.style.display = 'flex';
+  }
+  function hideMatchEndModal(){ resultOverlay.style.display = 'none'; }
+
+  function endRound(winner, { silent=false } = {}){
+    if (roundOver) return;
+    roundOver = true;
+
+    hitBtn.disabled = true; stopBtn.disabled = true;
+
+    if(winner==='player'){
+      playerScore++; statusEl.className='ok'; if(!silent) showToast('✅ ' + (lang==='ru'?'Ты выиграл раунд!':'You won the round!'),'win');
+      playSfx('win');
+    }else if(winner==='bot'){
+      botScore++; statusEl.className='bad'; if(!silent) showToast('❌ ' + (lang==='ru'?'Бот выиграл раунд!':'Bot won the round!'),'lose');
+      playSfx('lose');
+    }else{
+      statusEl.className='neutral'; if(!silent) showToast('🤝 ' + (lang==='ru'?'Ничья':'Draw'),'info');
+    }
+
+    drawChips();
+    statusEl.textContent = t('roundOver');
+
+    // подпись и пульс на фишке
+    const ps = sum(player), bs = sum(bot);
+    if(winner==='player'){
+      const i = playerScore-1; const chip = chipsL.children[i];
+      if(chip){ chip.classList.add('win'); chip.title = `Round: ${ps}:${bs}`; }
+    }else if(winner==='bot'){
+      const i = botScore-1; const chip = chipsR.children[i];
+      if(chip){ chip.classList.add('win'); chip.title = `Round: ${ps}:${bs}`; }
+    }
+
+    ensureWinTarget();
+
+    // конец матча — с паузой
+    if (playerScore >= winTarget || botScore >= winTarget) {
+      const msg = (playerScore > botScore)
+        ? t('youWonMatch',{ps:playerScore, bs:botScore})
+        : t('botWonMatch',{ps:playerScore, bs:botScore});
+      const MODAL_DELAY = 800;
+      statusEl.textContent = t('scoring');
+      postPanel.style.display = 'none';
+      setTimeout(() => showMatchEndModal(msg), MODAL_DELAY);
+      return;
+    }
+
+    postSummary.textContent = (lang==='ru'
+      ? `Ты ${ps} : ${bs} Бот — ` + (ps>bs ? 'победа' : ps<bs ? 'поражение' : 'ничья')
+      : `You ${ps} : ${bs} Bot — ` + (ps>bs ? 'win' : ps<bs ? 'loss' : 'draw'));
+    postPanel.style.display = 'block';
+  }
+
+  // ---------- ходы ----------
+  function onHit(){
+    if(roundOver || phase!=='player' || playerStop || animLock) return;
+    const card = getCard(deck);
+    if(card==null){
+      showToast(t('deckEmptyYou'),'info');
+      playerStop = true; bubble('player','—');
+      return switchToBot();
+    }
+    animLock = true;
+    player.push(card);
+    addCardToDOM('player', card);
+
+    const total = sum(player);
+    if(total>21){
+      showToast(t('youBust'),'lose', 1400);
+      playSfx('bust'); buzz(70);
+      animLock = false;
+      return endRound('bot', { silent:true });
+    }
+    if(total===21){ playerStop = true; bubble('player','21'); }
+
+    animLock = false;
+    switchToBot();
+  }
+
+  function onStop(){
+    if(roundOver || phase!=='player' || animLock) return;
+    playerStop = true;
+    bubble('player', lang==='ru'?'Стоп':'Stand');
+    showToast(t('youSaidStop'),'info');
+    playSfx('stop');
+    switchToBot();
+  }
+
+  function switchToBot(){
+    phase='bot';
+    hitBtn.disabled = true; stopBtn.disabled = true;
+    statusEl.textContent = '🤖 ' + t('botThinking');
+    statusEl.classList.add('thinking');
+    setTimeout(botStep, 800);
+  }
+
+  function afterBot(){
+    if(checkEnd()) return;
+    if(playerStop && !botStop){
+      setTimeout(botStep, 800);
+    }else{
+      phase='player';
+      statusEl.textContent = t('yourTurn');
+      statusEl.classList.remove('thinking');
+      hitBtn.disabled = false; stopBtn.disabled = false;
+    }
+  }
+
+  function botStep(){
+    if(roundOver || animLock) return setTimeout(botStep, 150);
+    const bsum = sum(bot);
+    if(bsum>=21){
+      if(!botStop){ botStop = true; bubble('bot','21'); }
+      return afterBot();
+    }
+    const decision = botDecision(bsum, deck); // улучшенный интеллект (#4)
+    if(decision==='hit'){
+      const card = getCard(deck);
+      if(card==null){
+        showToast(t('deckEmptyBot'),'info');
+        botStop = true;
+        return afterBot();
+      }
+      animLock = true;
+      bot.push(card);
+      addCardToDOM('bot', card);
+      if(sum(bot)>21){
+        showToast(t('botBust'),'win', 1400);
+        playSfx('bust'); buzz(70);
+        animLock=false;
+        return endRound('player', { silent:true });
+      }
+      animLock=false;
+      return afterBot();
+    }else{
+      botStop = true;
+      bubble('bot', lang==='ru'?'Стоп':'Stand');
+      showToast(t('botSaidStop'),'info');
+      playSfx('stop');
+      return afterBot();
+    }
+  }
+
+  // ---------- меню / матч ----------
+  function startMatch(){
+    difficulty = document.querySelector('input[name="diff"]:checked')?.value || 'normal';
+    ensureWinTarget();
+    playerScore=0; botScore=0;
+    drawChips();
+    hideMatchEndModal();
+    menuOverlay.style.display='none';
+    startRound();
+  }
+
+  function backToMenu(reset=false){
+    if(reset){ playerScore=botScore=0; drawChips(); }
+    hideMatchEndModal();
+    menuOverlay.style.display='flex';
+    postPanel.style.display='none';
+    statusEl.textContent='—';
+    statusEl.className='';
+    cardsPlayer.innerHTML=''; cardsBot.innerHTML='';
+    totalPlayer.innerHTML='<span class="badge">= 0</span>';
+    totalBot.innerHTML='<span class="badge">= 0</span>';
+  }
+
+  function showRules(){
+    alert(
+`${t('rules')}
+
+— 1..11 single-deck.
+— ${lang==='ru'?'В начале по 2 карты (≤11).':'Start with 2 cards (≤11).'}
+— ${lang==='ru'?'Твой ход первый: «Взять» или «Стоп».':'You move first: Hit or Stand.'}
+— ${lang==='ru'?'Бот решает по риску перебора.':'Bot decides by bust risk.'}
+— ${lang==='ru'?'Перебор мгновенно завершает раунд.':'Bust ends the round immediately.'}
+— ${lang==='ru'?'Матч до N побед (макс. 5).':'Match to N wins (max 5).'}`
+    );
+  }
+
+  // ---------- события ----------
+  hitBtn.addEventListener('click', ()=>{ playSfx('click'); onHit(); });
+  stopBtn.addEventListener('click', ()=>{ playSfx('click'); onStop(); });
+  nextBtn.addEventListener('click', ()=>{ playSfx('click'); startRound(); });
+  resetBtn.addEventListener('click', ()=>{ playSfx('click'); backToMenu(true); });
+  startBtn.addEventListener('click', ()=>{ playSfx('click'); startMatch(); });
+  rulesBtn.addEventListener('click', ()=>{ playSfx('click'); showRules(); });
+  menuBtn.addEventListener('click', ()=>{ playSfx('click'); backToMenu(true); });
+
+  okBtn.addEventListener('click', ()=>{ playSfx('click'); backToMenu(true); });
+  toMenuBtn.addEventListener('click', ()=>{ playSfx('click'); backToMenu(true); });
+  resultOverlay.addEventListener('click', (e)=>{ if(e.target===resultOverlay) backToMenu(true); });
+
+  // настройки
+  langSelect.value = lang;
+  langSelect.addEventListener('change', ()=>{ lang = langSelect.value; localStorage.lang=lang; applyLang(); drawChips(); });
+  sfxToggle.checked = sfxOn;
+  vibToggle.checked = vibOn;
+  sfxToggle.addEventListener('change', ()=>{ sfxOn = sfxToggle.checked; localStorage.sfxOn=sfxOn?'1':'0'; if(sfxOn) ensureAudio(); });
+  vibToggle.addEventListener('change', ()=>{ vibOn = vibToggle.checked; localStorage.vibOn=vibOn?'1':'0'; });
+
+  // горячие клавиши
+  document.addEventListener('keydown', (e)=>{
+    if(resultOverlay.style.display==='flex') {
+      if(e.key==='Escape' || e.key==='Enter') backToMenu(true);
+      return;
+    }
+    if(menuOverlay.style.display!=='none'){
+      if(e.key==='Enter') startMatch();
+      return;
+    }
+    if(e.key===' ') { e.preventDefault(); onHit(); }
+    else if(e.key==='Enter'){ onStop(); }
+    else if(e.key==='Escape'){ backToMenu(true); }
+  });
+
+  // первичный рендер
+  applyLang();
+  drawChips();
+})();
+</script>
+</body>
+</html>
