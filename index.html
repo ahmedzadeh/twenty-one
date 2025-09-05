@@ -17,11 +17,14 @@
   :root{
     --bg:#222; --panel:#2b2b2b; --table:#106b2e; --text:#fff; --accent:#ffd54f;
     --chip-green:#2ecc71; --chip-red:#e74c3c; --muted:#bbb; --danger:#ef5350; --good:#9CCC65; --win:#00e676;
-    --streak-fire:#ff6b35; --streak-ice:#4fc3f7;
+    --streak-fire:#ff6b35; --achievement-gold:#ffd700;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 "Segoe UI",system-ui,Arial,sans-serif}
   .wrap{max-width:1000px;margin:0 auto;padding:16px}
+
+  /* Game icon in title */
+  .game-title-icon{width:24px;height:24px;display:inline-block;vertical-align:middle;margin-right:8px}
 
   /* Панели */
   .panel{background:var(--panel);border:1px solid #444;border-radius:14px;box-shadow:0 6px 14px rgba(0,0,0,.25);transition:transform .2s ease}
@@ -33,9 +36,7 @@
   .streak-indicator{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-weight:900;font-size:18px;opacity:0;transition:opacity .3s ease}
   .streak-indicator.show{opacity:1}
   .streak-indicator.fire{color:var(--streak-fire);animation:flame 1s ease-in-out infinite}
-  .streak-indicator.ice{color:var(--streak-ice);animation:freeze 1s ease-in-out infinite}
   @keyframes flame{0%,100%{transform:translateY(-50%) scale(1)}50%{transform:translateY(-50%) scale(1.1)}}
-  @keyframes freeze{0%,100%{opacity:1}50%{opacity:0.7}}
 
   #chips{display:flex;align-items:center;gap:22px}
   .chips{display:flex;gap:8px}
@@ -47,13 +48,20 @@
   .chip:hover::after{content:attr(title);position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:#000;color:#fff;padding:4px 8px;border-radius:6px;font-size:12px;white-space:nowrap;opacity:0.9}
   @keyframes pop{from{transform:scale(.7)}to{transform:scale(1.05)}}
 
-  .menu-btn{position:absolute;left:20px;top:18px;background:#444;color:#fff;border:none;border-radius:10px;padding:6px 10px;font-weight:700;cursor:pointer;transition:all .2s ease}
-  .menu-btn:hover{background:#555;transform:translateY(-1px)}
-  .menu-btn:active{transform:translateY(1px)}
+  /* Top buttons */
+  .top-buttons{position:absolute;top:18px;display:flex;gap:8px}
+  .top-buttons.left{left:20px}
+  .top-buttons.right{right:20px}
+  
+  .icon-btn{background:#444;color:#fff;border:none;border-radius:10px;padding:6px 10px;font-weight:700;cursor:pointer;transition:all .2s ease}
+  .icon-btn:hover{background:#555;transform:translateY(-1px)}
+  .icon-btn:active{transform:translateY(1px)}
 
-  /* Stats button */
-  .stats-btn{position:absolute;right:20px;top:18px;background:#444;color:#fff;border:none;border-radius:10px;padding:6px 10px;font-weight:700;cursor:pointer;transition:all .2s ease}
-  .stats-btn:hover{background:#555;transform:translateY(-1px)}
+  /* Language selector */
+  .lang-selector{display:flex;gap:4px;background:#444;border-radius:10px;padding:4px}
+  .lang-btn{background:transparent;border:none;cursor:pointer;padding:4px 8px;border-radius:6px;transition:all .2s ease;font-size:20px}
+  .lang-btn:hover{background:#555}
+  .lang-btn.active{background:#666}
 
   /* Stats Panel */
   #statsPanel{display:none;margin:10px auto;padding:14px 16px;max-width:400px}
@@ -61,12 +69,40 @@
   .stat-row:last-child{border:none}
   .stat-label{color:#aaa}
   .stat-value{font-weight:700;color:var(--accent)}
+  .panel-buttons{display:flex;gap:8px;margin-top:12px;justify-content:center}
+  .danger-btn{background:#c62828}
+  .danger-btn:hover{background:#d32f2f}
+
+  /* Achievements Panel */
+  #achievementsPanel{display:none;margin:10px auto;padding:14px 16px;max-width:500px}
+  .achievement-item{display:flex;align-items:center;gap:12px;padding:10px;margin:6px 0;background:#333;border-radius:10px;transition:all .2s ease}
+  .achievement-item.unlocked{background:#1b5e20;border:1px solid #2e7d32}
+  .achievement-item.locked{opacity:0.6}
+  .achievement-icon{font-size:24px}
+  .achievement-info{flex:1}
+  .achievement-name{font-weight:700;color:var(--accent)}
+  .achievement-desc{font-size:14px;color:#aaa}
+  .achievement-status{font-size:20px}
+
+  /* Achievement notification */
+  .achievement-notification{
+    position:fixed;top:20px;left:50%;transform:translateX(-50%);
+    background:linear-gradient(135deg,var(--achievement-gold),#ffed4e);
+    color:#000;padding:16px 24px;border-radius:12px;
+    box-shadow:0 8px 24px rgba(0,0,0,.4);
+    font-weight:800;text-align:center;z-index:5000;
+    animation:achievementPop .5s ease;
+  }
+  @keyframes achievementPop{
+    from{transform:translate(-50%,-100px);opacity:0}
+    to{transform:translate(-50%,0);opacity:1}
+  }
 
   /* Стол */
   #table{position:relative;background:var(--table);border-radius:16px;padding:26px;margin-top:12px;overflow:hidden}
   #table::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 0%,rgba(0,0,0,0.3) 100%);pointer-events:none}
   
-  h1{margin:0 0 8px;text-align:center;color:var(--accent);text-shadow:2px 2px 4px rgba(0,0,0,0.3)}
+  h1{margin:0 0 8px;text-align:center;color:var(--accent);text-shadow:2px 2px 4px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;gap:8px}
   
   /* мини-колода для анимации */
   #deckStub{
@@ -155,7 +191,7 @@
   #status{text-align:center;color:var(--muted);margin-top:8px;font-weight:600}
   #status.thinking::after{
     content:"";display:inline-block;width:36px;height:10px;margin-left:6px;--c:#bbb;
-    background:radial-gradient(var(--c) 2px,transparent 3px) 0 50%/12px 10px repeat-x;
+    background:radial-gradient(var(--c) 2px,transparent 3px) 0 50%/12px 10px repeat-x;    
     animation:dots 1s steps(3,end) infinite;
   }
   #status.ok{color:#00e676} #status.bad{color:#ef5350} #status.neutral{color:#bbb}
@@ -170,13 +206,13 @@
   #menuOverlay{position:fixed; inset:0; background:rgba(0,0,0,.75);display:flex; align-items:center; justify-content:center;z-index:2000;backdrop-filter:blur(4px)}
   #menu{width:min(560px,92%);padding:16px 18px;animation:menuSlide .3s ease}
   @keyframes menuSlide{from{transform:translateY(-20px);opacity:0}to{transform:translateY(0);opacity:1}}
-  .menu-title{font-size:24px;color:var(--accent);font-weight:900;text-align:center;margin:6px 0}
+  .menu-title{font-size:24px;color:var(--accent);font-weight:900;text-align:center;margin:6px 0;display:flex;align-items:center;justify-content:center;gap:8px}
   .menu-sub{opacity:.9;text-align:center;margin-bottom:10px}
   .menu-row{display:flex;align-items:center;gap:12px;margin:8px 0;justify-content:center;flex-wrap:wrap}
   .menu-btns{display:flex;gap:10px;justify-content:center;margin-top:10px;flex-wrap:wrap}
   .spin{width:70px;padding:6px 8px;border-radius:10px;border:1px solid #666;background:#1f1f1f;color:#fff}
   label{cursor:pointer;transition:color .2s ease}
-  label:hover{color:var(--accent)}  
+  label:hover{color:var(--accent)}
   select, .chk{background:#1f1f1f;border:1px solid #666;color:#fff;border-radius:10px;padding:6px 8px}
 
   /* Модалка конца матча */
@@ -208,8 +244,8 @@
     .card .value{font-size:16px}
     .total{position:static;transform:none;margin-top:6px}
     #toast{bottom:110px}
-    .stats-btn{position:static;margin:8px auto;display:block}
-    .menu-btn{position:static;margin:8px auto;display:block}
+    .top-buttons{position:static;margin:8px auto;justify-content:center}
+    .lang-selector{margin:8px auto}
   }
   @media (prefers-reduced-motion:reduce){
     *{animation:none !important;transition:none !important}
@@ -218,8 +254,18 @@
 </head>
 <body>
   <div class="wrap">
-    <button id="menuBtn" class="menu-btn">≡ Меню</button>
-    <button id="statsBtn" class="stats-btn">📊 Статистика</button>
+    <div class="top-buttons left">
+      <button id="menuBtn" class="icon-btn">≡ <span id="menuText">Меню</span></button>
+    </div>
+    
+    <div class="top-buttons right">
+      <button id="statsBtn" class="icon-btn">📊</button>
+      <button id="achievementsBtn" class="icon-btn">🏆</button>
+      <div class="lang-selector">
+        <button class="lang-btn active" data-lang="ru">🇷🇺</button>
+        <button class="lang-btn" data-lang="en">🇬🇧</button>
+      </div>
+    </div>
 
     <div id="scorePanel" class="panel" aria-live="polite">
       <div id="scoreLabel" style="color:var(--accent);font-weight:900;">Счёт</div>
@@ -255,10 +301,25 @@
         <span class="stat-label" id="bestStreakLabel">Лучшая серия:</span>
         <span class="stat-value" id="bestStreak">0</span>
       </div>
+      <div class="panel-buttons">
+        <button id="clearStatsBtn" class="btn danger-btn">🗑️ <span id="clearStatsText">Очистить статистику</span></button>
+      </div>
+    </div>
+
+    <!-- Achievements Panel -->
+    <div id="achievementsPanel" class="panel" style="display:none;">
+      <h3 style="text-align:center;color:var(--accent);margin:8px 0;">🏆 <span id="achievementsTitle">Достижения</span></h3>
+      <div id="achievementsList"></div>
+      <div class="panel-buttons">
+        <button id="clearAchievementsBtn" class="btn danger-btn">🗑️ <span id="clearAchievementsText">Сбросить достижения</span></button>
+      </div>
     </div>
 
     <section id="table" class="panel" aria-label="Игровой стол">
-      <h1 id="titleGame">Игра 21</h1>
+      <h1 id="titleGame">
+        <img src="icons/favicon-32.png" alt="🃏" class="game-title-icon">
+        <span>Игра 21</span>
+      </h1>
       <div id="deckStub" aria-hidden="true"></div>
 
       <!-- Тоасты -->
@@ -280,11 +341,11 @@
 
       <div class="btn-row">
         <button id="hitBtn" class="btn">
-          🃏 Взять карту
+          🃏 <span id="hitText">Взять карту</span>
           <span class="kbd-hint">[H]</span>
         </button>
         <button id="stopBtn" class="btn">
-          ✋ Стоп
+          ✋ <span id="stopText">Стоп</span>
           <span class="kbd-hint">[S]</span>
         </button>
       </div>
@@ -297,10 +358,10 @@
       <div id="postSummary"></div>
       <div class="row">
         <button id="nextBtn" class="btn">
-          👉 Следующий раунд
+          👉 <span id="nextText">Следующий раунд</span>
           <span class="kbd-hint">[N]</span>
         </button>
-        <button id="resetBtn" class="btn">🔄 В меню</button>
+        <button id="resetBtn" class="btn">🔄 <span id="resetText">В меню</span></button>
       </div>
     </div>
   </div>
@@ -310,7 +371,10 @@
   <!-- Главное меню -->
   <div id="menuOverlay">
     <div id="menu" class="panel">
-      <div id="menuTitle" class="menu-title">Игра 21</div>
+      <div id="menuTitle" class="menu-title">
+        <img src="icons/favicon-32.png" alt="🃏" class="game-title-icon">
+        <span>Игра 21</span>
+      </div>
       <div id="menuSub" class="menu-sub">Выбери правила и начни матч</div>
 
       <div class="menu-row">
@@ -333,17 +397,11 @@
       <div class="menu-row">
         <label class="chk"><input type="checkbox" id="sfxToggle" checked> <span id="sfxLabel">Звук</span></label>
         <label class="chk"><input type="checkbox" id="vibToggle" checked> <span id="vibLabel">Вибрация</span></label>
-        <label>
-          <select id="langSelect">
-            <option value="ru">Русский</option>
-            <option value="en">English</option>
-          </select>
-        </label>
       </div>
 
       <div class="menu-btns">
-        <button id="startBtn" class="btn" style="background:#3d7a3d">▶ Начать матч</button>
-        <button id="rulesBtn" class="btn">📜 Правила</button>
+        <button id="startBtn" class="btn" style="background:#3d7a3d">▶ <span id="startText">Начать матч</span></button>
+        <button id="rulesBtn" class="btn">📜 <span id="rulesText">Правила</span></button>
       </div>
     </div>
   </div>
@@ -355,7 +413,7 @@
       <p id="modalText">Сообщение</p>
       <div class="row">
         <button id="okBtn" class="btn">ОК</button>
-        <button id="toMenuBtn" class="btn">В меню</button>
+        <button id="toMenuBtn" class="btn"><span id="toMenuText">В меню</span></button>
       </div>
     </div>
   </div>
@@ -367,7 +425,7 @@
     ru:{
       score:'Счёт', game21:'Игра 21', player:'Игрок', bot:'Бот',
       hit:'Взять карту', stop:'Стоп', yourTurn:'Твой ход', botThinking:'Бот думает…',
-      roundOver:'Раунд завершён', nextRound:'Следующий раунд', toMenu:'В меню',
+      roundOver:'Раунд завершён', nextRound:'Следующий раунд', toMenu:'В меню', menu:'Меню',
       newRound:'🎮 Новый раунд!',
       deckEmptyYou:'🪙 Колода пуста! Ты не можешь взять карту.',
       deckEmptyBot:'🪙 Колода пуста! Бот не может взять карту.',
@@ -379,16 +437,30 @@
       scoring:'Подсчёт очков…',
       menuTitle:'Игра 21', menuSub:'Выбери правила и начни матч',
       difficulty:'Сложность:', easy:'Лёгкая', normal:'Обычная', hard:'Сложная',
-      winsToWin:'Раундов до победы:', sound:'Звук', vib:'Вибрация',
+      winsToWin:'Раундов до победы:', sound:'Звук', vib:'Вибрация',      
       ok:'ОК', rules:'Правила', start:'Начать матч',
-      streak:'в серии', stats:'Статистика',
+      streak:'в серии', stats:'Статистика', achievements:'Достижения',
       winRate:'Процент побед', avgHand:'Средняя рука', bustRate:'Частота перебора',
-      totalGames:'Всего игр', bestStreak:'Лучшая серия'
+      totalGames:'Всего игр', bestStreak:'Лучшая серия',
+      clearStats:'Очистить статистику', clearAchievements:'Сбросить достижения',
+      confirmClearStats:'Вы уверены, что хотите очистить всю статистику?',
+      confirmClearAchievements:'Вы уверены, что хотите сбросить все достижения?',
+      // Achievements
+      achievementUnlocked:'Достижение разблокировано!',
+      firstWin:'Первая победа', firstWinDesc:'Выиграй свой первый раунд',
+      streak3:'Горячая серия', streak3Desc:'Выиграй 3 раунда подряд',
+      streak5:'В огне!', streak5Desc:'Выиграй 5 раундов подряд',
+      perfect21:'Идеальное 21', perfect21Desc:'Получи ровно 21 очко',
+      comeback:'Возвращение', comebackDesc:'Выиграй матч, проигрывая 0:2',
+      veteran:'Ветеран', veteranDesc:'Сыграй 50 раундов',
+      lucky7:'Счастливая семёрка', lucky7Desc:'Выиграй с 7 и 7 и 7',
+      noHit:'Без добора', noHitDesc:'Выиграй раунд, не взяв ни одной карты',
+      master:'Мастер', masterDesc:'Выиграй 10 матчей'
     },
     en:{
       score:'Score', game21:'Twenty-One', player:'Player', bot:'Bot',
       hit:'Hit', stop:'Stand', yourTurn:'Your move', botThinking:'Bot is thinking…',
-      roundOver:'Round finished', nextRound:'Next round', toMenu:'Menu',
+      roundOver:'Round finished', nextRound:'Next round', toMenu:'Menu', menu:'Menu',
       newRound:'🎮 New round!',
       deckEmptyYou:'🪙 Deck is empty! You cannot draw.',
       deckEmptyBot:'🪙 Deck is empty! Bot cannot draw.',
@@ -402,27 +474,44 @@
       difficulty:'Difficulty:', easy:'Easy', normal:'Normal', hard:'Hard',
       winsToWin:'Rounds to win:', sound:'Sound', vib:'Vibration',
       ok:'OK', rules:'Rules', start:'Start match',
-      streak:'streak', stats:'Statistics',
+      streak:'streak', stats:'Statistics', achievements:'Achievements',
       winRate:'Win rate', avgHand:'Average hand', bustRate:'Bust rate',
-      totalGames:'Total games', bestStreak:'Best streak'
+      totalGames:'Total games', bestStreak:'Best streak',
+      clearStats:'Clear statistics', clearAchievements:'Reset achievements',
+      confirmClearStats:'Are you sure you want to clear all statistics?',
+      confirmClearAchievements:'Are you sure you want to reset all achievements?',
+      // Achievements
+      achievementUnlocked:'Achievement unlocked!',
+      firstWin:'First Win', firstWinDesc:'Win your first round',
+      streak3:'Hot Streak', streak3Desc:'Win 3 rounds in a row',
+      streak5:'On Fire!', streak5Desc:'Win 5 rounds in a row',
+      perfect21:'Perfect 21', perfect21Desc:'Get exactly 21 points',
+      comeback:'Comeback Kid', comebackDesc:'Win a match after being down 0:2',
+      veteran:'Veteran', veteranDesc:'Play 50 rounds',
+      lucky7:'Lucky Seven', lucky7Desc:'Win with 7, 7, and 7',
+      noHit:'No Hit Wonder', noHitDesc:'Win a round without drawing any cards',
+      master:'Master', masterDesc:'Win 10 matches'
     }
   };
+  
   let lang = localStorage.lang || 'ru';
   const t = (k, vars={})=>{
     const raw = (i18n[lang]&&i18n[lang][k]) || i18n.ru[k] || k;
     return raw.replace('{ps}', vars.ps??'').replace('{bs}', vars.bs??'');
   };
+  
   function applyLang(){
     document.getElementById('scoreLabel').textContent = t('score');
-    document.getElementById('titleGame').textContent  = t('game21');
+    document.getElementById('titleGame').querySelector('span').textContent = t('game21');
+    document.getElementById('menuTitle').querySelector('span').textContent = t('game21');
     document.getElementById('whoPlayer').textContent  = t('player');
     document.getElementById('whoBot').textContent     = t('bot');
-    document.getElementById('hitBtn').innerHTML       = '🃏 ' + t('hit') + '<span class="kbd-hint">[H]</span>';
-    document.getElementById('stopBtn').innerHTML      = '✋ ' + t('stop') + '<span class="kbd-hint">[S]</span>';
+    document.getElementById('hitText').textContent    = t('hit');
+    document.getElementById('stopText').textContent   = t('stop');
     document.getElementById('postTitle').textContent  = t('roundOver');
-    document.getElementById('nextBtn').innerHTML      = '👉 ' + t('nextRound') + '<span class="kbd-hint">[N]</span>';
-    document.getElementById('resetBtn').textContent   = '🔄 ' + t('toMenu');
-    document.getElementById('menuTitle').textContent  = t('menuTitle');
+    document.getElementById('nextText').textContent   = t('nextRound');
+    document.getElementById('resetText').textContent  = t('toMenu');
+    document.getElementById('menuText').textContent   = t('menu');
     document.getElementById('menuSub').textContent    = t('menuSub');
     document.getElementById('diffLabel').textContent  = t('difficulty');
     document.getElementById('diffEasy').textContent   = t('easy');
@@ -431,11 +520,10 @@
     document.getElementById('winsLabel').textContent  = t('winsToWin');
     document.getElementById('sfxLabel').textContent   = t('sound');
     document.getElementById('vibLabel').textContent   = t('vib');
-    document.getElementById('startBtn').textContent   = '▶ ' + t('start');    
-    document.getElementById('rulesBtn').textContent   = '📜 ' + t('rules');
+    document.getElementById('startText').textContent  = t('start');
+    document.getElementById('rulesText').textContent  = t('rules');
     document.getElementById('okBtn').textContent      = t('ok');
-    document.getElementById('toMenuBtn').textContent  = t('toMenu');
-    document.getElementById('statsBtn').textContent   = '📊 ' + t('stats');
+    document.getElementById('toMenuText').textContent = t('toMenu');
     
     // Stats panel translations
     const statsTitle = document.getElementById('statsTitle');
@@ -454,7 +542,14 @@
       if(element) element.textContent = t(translationKey) + ':';
     }
     
+    document.getElementById('clearStatsText').textContent = t('clearStats');
+    document.getElementById('achievementsTitle').textContent = t('achievements');
+    document.getElementById('clearAchievementsText').textContent = t('clearAchievements');
+    
     statusEl.textContent = t('yourTurn');
+    
+    // Update achievements display
+    displayAchievements();
   }
 
   // ---------- состояние ----------
@@ -464,12 +559,13 @@
   let playerStop = false;
   let botStop = false;
   let roundOver = false;
-  let phase = 'player';          // 'player' | 'bot'
+  let phase = 'player';
   let animLock = false;
   let difficulty = 'normal';
-  let winTarget = 3;             // максимум 5
+  let winTarget = 3;
   let playerScore = 0;
   let botScore = 0;
+  let matchesWon = 0;
 
   // Statistics tracking
   let stats = {
@@ -482,19 +578,82 @@
     playerBusts: 0,
     botBusts: 0,
     bestStreak: 0,
-    currentStreak: { type: null, count: 0 }
+    currentStreak: 0  // Only track winning streaks
   };
 
-  // Load stats from localStorage
+  // Achievements
+  let achievements = {
+    firstWin: false,
+    streak3: false,
+    streak5: false,
+    perfect21: false,
+    comeback: false,
+    veteran: false,
+    lucky7: false,
+    noHit: false,
+    master: false
+  };
+
+  // Load data
   function loadStats() {
     const saved = localStorage.getItem('game21Stats');
-    if (saved) {
-      stats = JSON.parse(saved);
-    }
+    if (saved) stats = JSON.parse(saved);
+    const savedMatches = localStorage.getItem('game21Matches');
+    if (savedMatches) matchesWon = parseInt(savedMatches, 10);
   }
 
   function saveStats() {
     localStorage.setItem('game21Stats', JSON.stringify(stats));
+    localStorage.setItem('game21Matches', matchesWon);
+  }
+
+  function loadAchievements() {
+    const saved = localStorage.getItem('game21Achievements');
+    if (saved) achievements = JSON.parse(saved);
+  }
+
+  function saveAchievements() {
+    localStorage.setItem('game21Achievements', JSON.stringify(achievements));
+  }
+
+  function clearStats() {
+    if (confirm(t('confirmClearStats'))) {
+      stats = {
+        totalRounds: 0,
+        playerWins: 0,
+        botWins: 0,
+        draws: 0,
+        totalPlayerHands: 0,
+        totalBotHands: 0,
+        playerBusts: 0,
+        botBusts: 0,
+        bestStreak: 0,
+        currentStreak: 0
+      };
+      matchesWon = 0;
+      saveStats();
+      updateStatsDisplay();
+      showToast('📊 ' + (lang === 'ru' ? 'Статистика очищена' : 'Statistics cleared'), 'info');
+    }
+  }
+
+  function clearAchievements() {
+    if (confirm(t('confirmClearAchievements'))) {
+      achievements = {
+        firstWin: false,
+        streak3: false,
+        streak5: false,
+        perfect21: false,
+        comeback: false,
+        veteran: false,
+        lucky7: false,
+        noHit: false,
+        master: false
+      };
+      saveAchievements();
+      displayAchievements();
+      showToast('🏆 ' + (lang === 'ru' ? 'Достижения сброшены' : 'Achievements reset'), 'info');
+    }
   }
 
   function updateStatsDisplay() {
@@ -508,6 +667,127 @@
     document.getElementById('bustRate').textContent = bustRate + '%';
     document.getElementById('totalGames').textContent = stats.totalRounds;
     document.getElementById('bestStreak').textContent = stats.bestStreak;
+  }
+
+  // Achievement checking
+  function checkAchievements(winner) {
+    const ps = sum(player);
+    let newAchievement = null;
+    
+    // First Win
+    if (!achievements.firstWin && winner === 'player') {
+      achievements.firstWin = true;
+      newAchievement = { id: 'firstWin', icon: '🎯' };
+    }
+    
+    // Perfect 21
+    if (!achievements.perfect21 && winner === 'player' && ps === 21) {
+      achievements.perfect21 = true;
+      newAchievement = { id: 'perfect21', icon: '💎' };
+    }
+    
+    // Streak achievements
+    if (!achievements.streak3 && stats.currentStreak === 3) {
+      achievements.streak3 = true;
+      newAchievement = { id: 'streak3', icon: '🔥' };
+    }
+    
+    if (!achievements.streak5 && stats.currentStreak === 5) {
+      achievements.streak5 = true;
+      newAchievement = { id: 'streak5', icon: '🌟' };
+    }
+    
+    // Lucky 7 (three 7s)
+    if (!achievements.lucky7 && winner === 'player' && player.length === 3 && 
+        player.every(card => card === 7)) {
+      achievements.lucky7 = true;
+      newAchievement = { id: 'lucky7', icon: '🎰' };
+    }
+    
+    // No Hit Wonder
+    if (!achievements.noHit && winner === 'player' && player.length === 2) {
+      achievements.noHit = true;
+      newAchievement = { id: 'noHit', icon: '🎯' };
+    }
+    
+    // Veteran
+    if (!achievements.veteran && stats.totalRounds >= 50) {
+      achievements.veteran = true;
+      newAchievement = { id: 'veteran', icon: '🎖️' };
+    }
+    
+    // Master
+    if (!achievements.master && matchesWon >= 10) {
+      achievements.master = true;
+      newAchievement = { id: 'master', icon: '👑' };
+    }
+    
+    if (newAchievement) {
+      showAchievementNotification(newAchievement);
+      saveAchievements();
+      displayAchievements();
+    }
+  }
+
+  function checkComebackAchievement() {
+    if (!achievements.comeback && playerScore >= winTarget && botScore === winTarget - 1) {
+      // Check if player was down 0:2
+      achievements.comeback = true;
+      showAchievementNotification({ id: 'comeback', icon: '💪' });
+      saveAchievements();
+      displayAchievements();
+    }
+  }
+
+  function showAchievementNotification(achievement) {
+    const notification = document.createElement('div');
+    notification.className = 'achievement-notification';
+    notification.innerHTML = `
+      ${achievement.icon} ${t('achievementUnlocked')}<br>
+      <strong>${t(achievement.id)}</strong>
+    `;
+    document.body.appendChild(notification);
+    
+    playSfx('achievement');
+    buzz(100);
+    
+    setTimeout(() => {
+      notification.style.transform = 'translate(-50%, -100px)';
+      notification.style.opacity = '0';
+      setTimeout(() => notification.remove(), 500);
+    }, 3000);
+  }
+
+  function displayAchievements() {
+    const list = document.getElementById('achievementsList');
+    list.innerHTML = '';
+    
+    const achievementData = [
+      { id: 'firstWin', icon: '🎯' },
+      { id: 'streak3', icon: '🔥' },
+      { id: 'streak5', icon: '🌟' },
+      { id: 'perfect21', icon: '💎' },
+      { id: 'comeback', icon: '💪' },
+      { id: 'veteran', icon: '🎖️' },
+      { id: 'lucky7', icon: '🎰' },      
+      { id: 'noHit', icon: '🎯' },
+      { id: 'master', icon: '👑' }
+    ];
+    
+    achievementData.forEach(data => {
+      const unlocked = achievements[data.id];
+      const item = document.createElement('div');
+      item.className = `achievement-item ${unlocked ? 'unlocked' : 'locked'}`;
+      item.innerHTML = `
+        <div class="achievement-icon">${data.icon}</div>
+        <div class="achievement-info">
+          <div class="achievement-name">${t(data.id)}</div>
+          <div class="achievement-desc">${t(data.id + 'Desc')}</div>
+        </div>
+        <div class="achievement-status">${unlocked ? '✅' : '🔒'}</div>
+      `;
+      list.appendChild(item);
+    });
   }
 
   // звук/вибрация
@@ -534,6 +814,12 @@
       case 'lose': tone(220,0.18,'sawtooth',0.06); break;
       case 'bust': tone(160,0.22,'sawtooth',0.06); break;
       case 'streak': tone(1320,0.15,'sine',0.04); setTimeout(()=>tone(1568,0.15,'sine',0.04),100); break;
+      case 'achievement': 
+        tone(1047,0.1,'sine',0.05); 
+        setTimeout(()=>tone(1319,0.1,'sine',0.05),100);
+        setTimeout(()=>tone(1568,0.1,'sine',0.05),200);
+        setTimeout(()=>tone(2093,0.2,'sine',0.05),300);
+        break;
     }
   }
   function buzz(ms=50){ if(vibOn && navigator.vibrate) navigator.vibrate(ms); }
@@ -544,8 +830,8 @@
   const rulesBtn = document.getElementById('rulesBtn');
   const menuBtn = document.getElementById('menuBtn');
   const statsBtn = document.getElementById('statsBtn');
+  const achievementsBtn = document.getElementById('achievementsBtn');
   const winInput = document.getElementById('winTarget');
-  const langSelect = document.getElementById('langSelect');
   const sfxToggle = document.getElementById('sfxToggle');
   const vibToggle = document.getElementById('vibToggle');
 
@@ -572,7 +858,11 @@
 
   const deckStub = document.getElementById('deckStub');
   const statsPanel = document.getElementById('statsPanel');
+  const achievementsPanel = document.getElementById('achievementsPanel');
   const streakIndicator = document.getElementById('streakIndicator');
+
+  const clearStatsBtn = document.getElementById('clearStatsBtn');
+  const clearAchievementsBtn = document.getElementById('clearAchievementsBtn');
 
   // модалка конца матча
   const resultOverlay = document.getElementById('resultOverlay');
@@ -580,6 +870,26 @@
   const modalText  = document.getElementById('modalText');
   const okBtn      = document.getElementById('okBtn');
   const toMenuBtn  = document.getElementById('toMenuBtn');
+
+  // Language buttons
+  const langBtns = document.querySelectorAll('.lang-btn');
+  langBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      langBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      lang = btn.dataset.lang;
+      localStorage.lang = lang;
+      applyLang();
+      drawChips();
+      updateStatsDisplay();
+    });
+  });
+
+  // Set active language button
+  langBtns.forEach(btn => {
+    if (btn.dataset.lang === lang) btn.classList.add('active');
+    else btn.classList.remove('active');
+  });
 
   // ---------- утилиты/колода ----------
   const rng = arr => arr[Math.floor(Math.random()*arr.length)];
@@ -628,13 +938,11 @@
   }
 
   function botDecision(total, d, playerTotal = null){
-    // Enhanced decision making
     if(total >= 20) return 'stop';
-    if(total <= 11) return 'hit'; // Can't bust
+    if(total <= 11) return 'hit';
     
     let p = bustProb(total, d);
     
-    // For hard difficulty, use card counting
     if(difficulty === 'hard') {
       const seenCards = getSeenCards();
       p = adjustedBustProb(total, d, seenCards);
@@ -642,15 +950,12 @@
     
     let risk = (difficulty==='easy'? 0.25 : difficulty==='hard'? 0.55 : 0.40);
     
-    // Adjust strategy based on player's visible total
     if(playerTotal && playerStop) {
       if(total > playerTotal) return 'stop';
       if(total === playerTotal && difficulty !== 'hard') return 'stop';
-      // Be more aggressive if behind
       risk = Math.min(risk * 1.3, 0.7);
     }
     
-    // Pattern-based decisions for hard difficulty
     if(difficulty === 'hard') {
       if(total === 16) return p < 0.5 ? 'hit' : 'stop';
       if(total === 17) return p < 0.35 ? 'hit' : 'stop';
@@ -696,11 +1001,9 @@
   function addCardToDOM(owner, value){
     const cont = owner==='player'?cardsPlayer:cardsBot;
     
-    // Pulse deck stub
     deckStub.classList.add('pulse');
     setTimeout(()=>deckStub.classList.remove('pulse'), 400);
 
-    // летающая карта
     const fly = makeCardEl(value, owner);
     fly.classList.add('fly');
     document.body.appendChild(fly);
@@ -710,7 +1013,6 @@
     fly.style.left = deckRect.left + 'px';
     fly.style.top  = deckRect.top  + 'px';
 
-    // цель — приблизительный центр контейнера
     const dx = (targetRect.left + targetRect.width/2) - deckRect.left - 28;
     const dy = (targetRect.top  + 8) - deckRect.top - 39;
 
@@ -719,7 +1021,6 @@
     setTimeout(()=>{
       fly.remove();
 
-      // финальная карта в контейнере
       const el = makeCardEl(value, owner);
       cont.appendChild(el);
       el.classList.add('flash');
@@ -760,33 +1061,20 @@
   // ---------- счёт и серии ----------
   function updateStreak(winner) {
     if(winner === 'player') {
-      if(stats.currentStreak.type === 'win') {
-        stats.currentStreak.count++;
-      } else {
-        stats.currentStreak = { type: 'win', count: 1 };
-      }
-    } else if(winner === 'bot') {
-      if(stats.currentStreak.type === 'loss') {
-        stats.currentStreak.count++;
-      } else {
-        stats.currentStreak = { type: 'loss', count: 1 };
+      stats.currentStreak++;
+      if(stats.currentStreak > stats.bestStreak) {
+        stats.bestStreak = stats.currentStreak;
       }
     } else {
-      stats.currentStreak = { type: null, count: 0 };
+      stats.currentStreak = 0;
     }
     
-    // Update best streak
-    if(stats.currentStreak.type === 'win' && stats.currentStreak.count > stats.bestStreak) {
-      stats.bestStreak = stats.currentStreak.count;
-    }    
-    
     // Display streak if 3 or more
-    if(stats.currentStreak.count >= 3) {
-      const isWin = stats.currentStreak.type === 'win';
-      streakIndicator.textContent = `${isWin ? '🔥' : '❄️'} ${stats.currentStreak.count} ${t('streak')}`;
-      streakIndicator.className = 'streak-indicator show ' + (isWin ? 'fire' : 'ice');
-      showToast(`${isWin ? '🔥' : '❄️'} ${stats.currentStreak.count} ${t('streak')}!`, 'streak', 1500);
-      if(stats.currentStreak.count === 3) playSfx('streak');
+    if(stats.currentStreak >= 3) {
+      streakIndicator.textContent = `🔥 ${stats.currentStreak} ${t('streak')}`;
+      streakIndicator.className = 'streak-indicator show fire';
+      showToast(`🔥 ${stats.currentStreak} ${t('streak')}!`, 'streak', 1500);
+      if(stats.currentStreak === 3) playSfx('streak');
     } else {
       streakIndicator.classList.remove('show');
     }
@@ -810,7 +1098,7 @@
   // ---------- валидатор цели матча ----------
   function ensureWinTarget(){
     const v = parseInt(winInput.value, 10);
-    winTarget = [2,3,4,5].includes(v) ? v : 3;  // допустим только 2..5
+    winTarget = [2,3,4,5].includes(v) ? v : 3;
     winInput.value = String(winTarget);
     winInput.addEventListener('change', ()=>{ ensureWinTarget(); drawChips(); });
   }
@@ -824,7 +1112,7 @@
     phase = 'player';
     animLock = false;
 
-    cardsPlayer.innerHTML = ''; cardsBot.innerHTML='';
+    cardsPlayer.innerHTML = ''; cardsBot.innerHTML='';    
     player.forEach(v=>cardsPlayer.appendChild(makeCardEl(v,'player')));
     bot.forEach(v=>cardsBot.appendChild(makeCardEl(v,'bot')));
     renderTotals();
@@ -834,7 +1122,6 @@
     postPanel.style.display = 'none';
     hitBtn.disabled = false; stopBtn.disabled = false;
 
-    // Remove bot thinking animation
     document.getElementById('handBot').classList.remove('thinking');
 
     showToast(t('newRound'),'info');
@@ -897,6 +1184,9 @@
     // Update streak
     updateStreak(winner);
     
+    // Check achievements
+    checkAchievements(winner);
+    
     // Save stats
     saveStats();
     updateStatsDisplay();
@@ -917,6 +1207,13 @@
 
     // конец матча — с паузой
     if (playerScore >= winTarget || botScore >= winTarget) {
+      if (playerScore > botScore) {
+        matchesWon++;
+        saveStats();
+        checkComebackAchievement();
+        checkAchievements('match');
+      }
+      
       const msg = (playerScore > botScore)
         ? t('youWonMatch',{ps:playerScore, bs:botScore})
         : t('botWonMatch',{ps:playerScore, bs:botScore});
@@ -999,7 +1296,6 @@
       return afterBot();
     }
     
-    // Enhanced bot decision with player awareness
     const playerTotal = playerStop ? sum(player) : null;
     const decision = botDecision(bsum, deck, playerTotal);
     
@@ -1036,7 +1332,7 @@
     difficulty = document.querySelector('input[name="diff"]:checked')?.value || 'normal';
     ensureWinTarget();
     playerScore=0; botScore=0;
-    stats.currentStreak = { type: null, count: 0 };
+    stats.currentStreak = 0;
     streakIndicator.classList.remove('show');
     drawChips();
     hideMatchEndModal();
@@ -1047,7 +1343,7 @@
   function backToMenu(reset=false){
     if(reset){ 
       playerScore=botScore=0; 
-      stats.currentStreak = { type: null, count: 0 };
+      stats.currentStreak = 0;
       streakIndicator.classList.remove('show');
       drawChips(); 
     }
@@ -1055,6 +1351,7 @@
     menuOverlay.style.display='flex';
     postPanel.style.display='none';
     statsPanel.style.display='none';
+    achievementsPanel.style.display='none';
     statusEl.textContent='—';
     statusEl.className='';
     cardsPlayer.innerHTML=''; cardsBot.innerHTML='';
@@ -1098,25 +1395,29 @@ ${lang==='ru'?'Горячие клавиши:':'Keyboard shortcuts:'}
   startBtn.addEventListener('click', ()=>{ playSfx('click'); startMatch(); });
   rulesBtn.addEventListener('click', ()=>{ playSfx('click'); showRules(); });
   menuBtn.addEventListener('click', ()=>{ playSfx('click'); backToMenu(true); });
+  
   statsBtn.addEventListener('click', ()=>{ 
     playSfx('click'); 
+    achievementsPanel.style.display = 'none';
     statsPanel.style.display = statsPanel.style.display === 'none' ? 'block' : 'none';
     updateStatsDisplay();
   });
+  
+  achievementsBtn.addEventListener('click', ()=>{ 
+    playSfx('click'); 
+    statsPanel.style.display = 'none';
+    achievementsPanel.style.display = achievementsPanel.style.display === 'none' ? 'block' : 'none';
+    displayAchievements();
+  });
+
+  clearStatsBtn.addEventListener('click', ()=>{ playSfx('click'); clearStats(); });
+  clearAchievementsBtn.addEventListener('click', ()=>{ playSfx('click'); clearAchievements(); });
 
   okBtn.addEventListener('click', ()=>{ playSfx('click'); backToMenu(true); });
   toMenuBtn.addEventListener('click', ()=>{ playSfx('click'); backToMenu(true); });
   resultOverlay.addEventListener('click', (e)=>{ if(e.target===resultOverlay) backToMenu(true); });
 
   // настройки
-  langSelect.value = lang;
-  langSelect.addEventListener('change', ()=>{ 
-    lang = langSelect.value; 
-    localStorage.lang=lang; 
-    applyLang(); 
-    drawChips(); 
-    updateStatsDisplay();
-  });
   sfxToggle.checked = sfxOn;
   vibToggle.checked = vibOn;
   sfxToggle.addEventListener('change', ()=>{ sfxOn = sfxToggle.checked; localStorage.sfxOn=sfxOn?'1':'0'; if(sfxOn) ensureAudio(); });
@@ -1178,9 +1479,11 @@ ${lang==='ru'?'Горячие клавиши:':'Keyboard shortcuts:'}
 
   // первичный рендер
   loadStats();
+  loadAchievements();
   applyLang();
   drawChips();
   updateStatsDisplay();
+  displayAchievements();
 })();
 </script>
 </body>
