@@ -14,14 +14,33 @@
   <!-- /ИКОНКИ -->
 
 <style>
-  :root{
+  /* Theme variables */
+  [data-theme="dark"] {
     --bg:#222; --panel:#2b2b2b; --table:#106b2e; --text:#fff; --accent:#ffd54f;
     --chip-green:#2ecc71; --chip-red:#e74c3c; --muted:#bbb; --danger:#ef5350; --good:#9CCC65; --win:#00e676;
     --streak-fire:#ff6b35; --achievement-gold:#ffd700;
-    --special-gradient: linear-gradient(45deg, #ff6b6b, #4ecdc4, #ffe66d, #a8e6cf);
   }
+  
+  [data-theme="light"] {
+    --bg:#f5f5f5; --panel:#fff; --table:#2e7d32; --text:#212121; --accent:#f57c00;
+    --chip-green:#4caf50; --chip-red:#f44336; --muted:#757575; --danger:#d32f2f; --good:#689f38; --win:#00c853;
+    --streak-fire:#ff5722; --achievement-gold:#ffc107;
+  }
+  
+  [data-theme="neon"] {
+    --bg:#0a0a0a; --panel:#1a1a1a; --table:#003d00; --text:#00ff88; --accent:#ff00ff;
+    --chip-green:#00ff00; --chip-red:#ff0066; --muted:#00cc66; --danger:#ff0044; --good:#00ff99; --win:#00ffff;
+    --streak-fire:#ff6600; --achievement-gold:#ffff00;
+  }
+  
+  [data-theme="royal"] {
+    --bg:#1a1a3e; --panel:#2d2d5e; --table:#4a148c; --text:#ffd700; --accent:#fff;
+    --chip-green:#ffd700; --chip-red:#ff6b6b; --muted:#daa520; --danger:#dc143c; --good:#32cd32; --win:#00fa9a;
+    --streak-fire:#ff4500; --achievement-gold:#ffd700;
+  }
+
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 "Segoe UI",system-ui,Arial,sans-serif}
+  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 "Segoe UI",system-ui,Arial,sans-serif;transition:background-color .3s ease}
   .wrap{max-width:1000px;margin:0 auto;padding:16px}
 
   /* Enhanced game icon */
@@ -40,24 +59,10 @@
   }
 
   /* Панели */
-  .panel{background:var(--panel);border:1px solid #444;border-radius:14px;box-shadow:0 6px 14px rgba(0,0,0,.25);transition:transform .2s ease}
+  .panel{background:var(--panel);border:1px solid #444;border-radius:14px;box-shadow:0 6px 14px rgba(0,0,0,.25);transition:all .3s ease}
   .panel:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.3)}
   
   #scorePanel{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 14px;margin:8px auto;position:relative}
-
-  /* Game mode indicator */
-  .game-mode-badge{
-    position:absolute;
-    left:14px;
-    top:50%;
-    transform:translateY(-50%);
-    background:#444;
-    color:var(--accent);
-    padding:4px 8px;
-    border-radius:6px;
-    font-size:12px;
-    font-weight:700;
-  }
 
   /* Streak indicator */
   .streak-indicator{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-weight:900;font-size:18px;opacity:0;transition:opacity .3s ease}
@@ -84,6 +89,16 @@
   .icon-btn:hover{background:#555;transform:translateY(-1px)}
   .icon-btn:active{transform:translateY(1px)}
 
+  /* Theme selector */
+  .theme-selector{display:flex;gap:4px;background:#444;border-radius:10px;padding:4px}
+  .theme-btn{width:24px;height:24px;border:none;border-radius:6px;cursor:pointer;transition:all .2s ease;position:relative}
+  .theme-btn:hover{transform:scale(1.1)}
+  .theme-btn.active::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold}
+  .theme-btn[data-theme="dark"]{background:#222}
+  .theme-btn[data-theme="light"]{background:#f5f5f5}
+  .theme-btn[data-theme="neon"]{background:linear-gradient(45deg,#0a0a0a,#00ff88)}
+  .theme-btn[data-theme="royal"]{background:linear-gradient(45deg,#1a1a3e,#ffd700)}
+
   /* Language selector */
   .lang-selector{display:flex;gap:4px;background:#444;border-radius:10px;padding:4px}
   .lang-btn{background:transparent;border:none;cursor:pointer;padding:4px 8px;border-radius:6px;transition:all .2s ease;font-size:20px}
@@ -94,7 +109,7 @@
   #statsPanel{display:none;margin:10px auto;padding:14px 16px;max-width:400px}
   .stat-row{display:flex;justify-content:space-between;margin:6px 0;padding:6px 0;border-bottom:1px solid #333}
   .stat-row:last-child{border:none}
-  .stat-label{color:#aaa}
+  .stat-label{color:var(--muted)}
   .stat-value{font-weight:700;color:var(--accent)}
   .panel-buttons{display:flex;gap:8px;margin-top:12px;justify-content:center}
   .danger-btn{background:#c62828}
@@ -108,7 +123,7 @@
   .achievement-icon{font-size:24px}
   .achievement-info{flex:1}
   .achievement-name{font-weight:700;color:var(--accent)}
-  .achievement-desc{font-size:14px;color:#aaa}
+  .achievement-desc{font-size:14px;color:var(--muted)}
   .achievement-status{font-size:20px}
 
   /* Achievement notification */
@@ -123,19 +138,6 @@
   @keyframes achievementPop{
     from{transform:translate(-50%,-100px);opacity:0}
     to{transform:translate(-50%,0);opacity:1}
-  }
-
-  /* Power-up notification */
-  .powerup-notification{
-    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-    background:rgba(0,0,0,0.9);color:#fff;padding:20px 30px;
-    border-radius:16px;border:2px solid var(--accent);
-    font-weight:800;text-align:center;z-index:100;
-    animation:powerupPop .5s ease;
-  }
-  @keyframes powerupPop{
-    from{transform:translate(-50%,-50%) scale(0);opacity:0}
-    to{transform:translate(-50%,-50%) scale(1);opacity:1}
   }
 
   /* Стол */
@@ -165,6 +167,9 @@
          font-weight:800;border:1px solid #444;box-shadow:0 2px 10px rgba(0,0,0,.25);transition:all .2s ease}
   .badge.good{color:var(--good)} .badge.win{color:var(--win)} .badge.bad{color:var(--danger)}
 
+  /* Light theme badge fix */
+  [data-theme="light"] .badge{background:#f5f5f5;border-color:#ddd}
+
   /* Баблы */
   .bubble{position:absolute;top:-12px;left:50%;transform:translateX(-50%);
           background:#1f1f1f;border:1px solid #444;color:#fff;padding:6px 10px;border-radius:12px;
@@ -184,42 +189,15 @@
   .card.grey{background:#e6e6e6}
   .card.red{color:#e53935} .card.black{color:#111}
   
-  /* Special cards */
-  .card.special{
-    background:var(--special-gradient);
-    background-size:300% 300%;
-    animation:shimmer 3s ease infinite;
-    color:#fff;
-    text-shadow:1px 1px 2px rgba(0,0,0,0.5);
-    border-color:#ffd700;
-    box-shadow:0 0 20px rgba(255,215,0,0.5), 2px 2px 0 #111;
+  /* Neon theme cards */
+  [data-theme="neon"] .card{
+    background:#000;
+    border-color:#00ff88;
+    box-shadow:0 0 10px #00ff88;
   }
-  @keyframes shimmer{
-    0%{background-position:0% 50%}
-    50%{background-position:100% 50%}
-    100%{background-position:0% 50%}
-  }
-  
-  .card.special .corner{color:#fff !important}
-  .card.special .value{
-    font-size:20px;
-    text-shadow:0 0 10px rgba(255,255,255,0.8);
-  }
-  
-  /* Shield effect */
-  .card.shield::after{
-    content:'🛡️';
-    position:absolute;
-    top:-10px;
-    right:-10px;
-    font-size:20px;
-    filter:drop-shadow(0 0 4px rgba(255,215,0,0.8));
-    animation:float 2s ease-in-out infinite;
-  }
-  @keyframes float{
-    0%,100%{transform:translateY(0)}
-    50%{transform:translateY(-5px)}
-  }
+  [data-theme="neon"] .card.grey{background:#111}
+  [data-theme="neon"] .card.red{color:#ff0066}
+  [data-theme="neon"] .card.black{color:#00ff88}
   
   .card .corner{position:absolute;font-size:14px}
   .card .tl{left:6px;top:6px} .card .br{right:6px;bottom:6px}
@@ -232,7 +210,7 @@
     100%{transform:rotateY(0deg) scale(1)}
   }
   .card.flash{animation:flash .45s ease}
-  .card .pill{position:absolute;right:-8px;top:-8px;background:#222;color:#ffd54f;
+  .card .pill{position:absolute;right:-8px;top:-8px;background:#222;color:#ffd54f;              
               border:1px solid #444;border-radius:999px;padding:2px 6px;font-size:12px;font-weight:900;
               animation:pillPop .3s ease}
   @keyframes flash{0%{box-shadow:0 0 0 0 rgba(255,255,255,.6)}100%{box-shadow:2px 2px 0 #111}}
@@ -255,7 +233,6 @@
   .toast.lose{color:#ef5350;border-color:#ef5350}
   .toast.info{color:#ffd54f}
   .toast.streak{background:linear-gradient(135deg,#ff6b35,#ffd54f);color:#000;border:none}
-  .toast.powerup{background:linear-gradient(135deg,#a8e6cf,#dcedc1);color:#000;border:none}
 
   /* Кнопки */
   .btn-row{display:flex;justify-content:center;gap:12px;margin-top:12px}
@@ -278,24 +255,24 @@
   /* Статус */
   #status{text-align:center;color:var(--muted);margin-top:8px;font-weight:600}
   #status.thinking::after{
-    content:"";display:inline-block;width:36px;height:10px;margin-left:6px;--c:#bbb;
+    content:"";display:inline-block;width:36px;height:10px;margin-left:6px;--c:var(--muted);
     background:radial-gradient(var(--c) 2px,transparent 3px) 0 50%/12px 10px repeat-x;
     animation:dots 1s steps(3,end) infinite;
   }
-  #status.ok{color:#00e676} #status.bad{color:#ef5350} #status.neutral{color:#bbb}
+  #status.ok{color:var(--good)} #status.bad{color:var(--danger)} #status.neutral{color:var(--muted)}
   @keyframes dots{from{background-position:0 50%}to{background-position:-36px 50%}}
 
   /* Пост-панель */
   #postPanel{display:none;margin:10px auto 0;padding:10px 12px;max-width:520px}
   #postPanel .row{display:flex;gap:10px;justify-content:center}
-  #postSummary{text-align:center;margin:-2px 0 8px;color:#ddd;font-weight:700}
+  #postSummary{text-align:center;margin:-2px 0 8px;color:var(--muted);font-weight:700}
 
   /* Меню */
   #menuOverlay{position:fixed; inset:0; background:rgba(0,0,0,.75);display:flex; align-items:center; justify-content:center;z-index:2000;backdrop-filter:blur(4px)}
   #menu{width:min(560px,92%);padding:16px 18px;animation:menuSlide .3s ease}
   @keyframes menuSlide{from{transform:translateY(-20px);opacity:0}to{transform:translateY(0);opacity:1}}
   .menu-title{font-size:24px;color:var(--accent);font-weight:900;text-align:center;margin:6px 0;display:flex;align-items:center;justify-content:center;gap:8px}
-  .menu-sub{opacity:.9;text-align:center;margin-bottom:10px}
+  .menu-sub{opacity:.9;text-align:center;margin-bottom:10px;color:var(--muted)}
   .menu-row{display:flex;align-items:center;gap:12px;margin:8px 0;justify-content:center;flex-wrap:wrap}
   .menu-btns{display:flex;gap:10px;justify-content:center;margin-top:10px;flex-wrap:wrap}
   .spin{width:70px;padding:6px 8px;border-radius:10px;border:1px solid #666;background:#1f1f1f;color:#fff}
@@ -303,22 +280,12 @@
   label:hover{color:var(--accent)}
   select, .chk{background:#1f1f1f;border:1px solid #666;color:#fff;border-radius:10px;padding:6px 8px}
 
-  /* Game mode selector */
-  .mode-selector{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0}
-  .mode-btn{
-    background:#2a2a2a;color:#fff;border:2px solid #444;border-radius:10px;
-    padding:8px 16px;cursor:pointer;transition:all .2s ease;
-  }
-  .mode-btn:hover{background:#3a3a3a;border-color:#666}
-  .mode-btn.active{background:#3d7a3d;border-color:var(--accent)}
-  .mode-desc{font-size:12px;color:#aaa;margin-top:2px}
-
   /* Модалка конца матча */
   #resultOverlay{position:fixed; inset:0; background:rgba(0,0,0,.65);display:none; align-items:center; justify-content:center;z-index:3000;backdrop-filter:blur(4px)}
   #resultModal{background:var(--panel);border:1px solid #444;border-radius:14px;padding:16px 18px;
                width:min(420px,92%);box-shadow:0 12px 32px rgba(0,0,0,.4);text-align:center;animation:modalPop .3s ease}
   #resultModal h3{margin:6px 0 8px;color:var(--accent);animation:pop .5s ease}
-  #resultModal p{margin:0 0 12px;color:#ddd}
+  #resultModal p{margin:0 0 12px;color:var(--muted)}
   #resultModal .row{display:flex;gap:10px;justify-content:center}
   #okBtn{background:#2e7d32}
   #okBtn:hover{background:#388e3c}
@@ -344,14 +311,14 @@
     #toast{bottom:110px}
     .top-buttons{position:static;margin:8px auto;justify-content:center}
     .lang-selector{margin:8px auto}
-    .game-mode-badge{position:static;margin:4px auto}
+    .theme-selector{margin:8px auto}
   }
   @media (prefers-reduced-motion:reduce){
     *{animation:none !important;transition:none !important}
   }
 </style>
 </head>
-<body>
+<body data-theme="dark">
   <div class="wrap">
     <div class="top-buttons left">
       <button id="menuBtn" class="icon-btn">≡ <span id="menuText">Меню</span></button>
@@ -360,6 +327,12 @@
     <div class="top-buttons right">
       <button id="statsBtn" class="icon-btn">📊</button>
       <button id="achievementsBtn" class="icon-btn">🏆</button>
+      <div class="theme-selector">
+        <button class="theme-btn active" data-theme="dark" title="Dark"></button>
+        <button class="theme-btn" data-theme="light" title="Light"></button>
+        <button class="theme-btn" data-theme="neon" title="Neon"></button>
+        <button class="theme-btn" data-theme="royal" title="Royal"></button>
+      </div>
       <div class="lang-selector">
         <button class="lang-btn active" data-lang="ru">🇷🇺</button>
         <button class="lang-btn" data-lang="en">🇬🇧</button>
@@ -367,7 +340,6 @@
     </div>
 
     <div id="scorePanel" class="panel" aria-live="polite">
-      <div class="game-mode-badge" id="gameModeBadge">Классика</div>
       <div id="scoreLabel" style="color:var(--accent);font-weight:900;">Счёт</div>
       <div id="scoreText" style="font-weight:800;">Ты 0 - 0 Бот</div>
       <div id="chips">
@@ -470,41 +442,28 @@
 
   <!-- Главное меню -->
   <div id="menuOverlay">
-    <div id="menu" class="panel">
-      <div id="menuTitle" class="menu-title">        
+    <div id="menu" class="panel">      
+      <div id="menuTitle" class="menu-title">
         <img src="icons/favicon-32.png" alt="🃏" class="game-title-icon">
         <span>Игра 21</span>
       </div>
       <div id="menuSub" class="menu-sub">Выбери правила и начни матч</div>
-
-      <!-- Game Mode Selection -->
-      <div class="menu-row">
-        <strong id="modeLabel">Режим игры:</strong>
-      </div>
-      <div class="mode-selector">
-        <button class="mode-btn active" data-mode="classic">
-          <div>🎮 <span id="modeClassic">Классика</span></div>
-          <div class="mode-desc" id="modeClassicDesc">11 карт, до 3 побед</div>
-        </button>
-        <button class="mode-btn" data-mode="quick">
-          <div>⚡ <span id="modeQuick">Быстрый</span></div>
-          <div class="mode-desc" id="modeQuickDesc">7 карт, до 2 побед</div>
-        </button>
-        <button class="mode-btn" data-mode="marathon">
-          <div>🏃 <span id="modeMarathon">Марафон</span></div>
-          <div class="mode-desc" id="modeMarathonDesc">15 карт, до 5 побед</div>
-        </button>
-        <button class="mode-btn" data-mode="special">
-          <div>✨ <span id="modeSpecial">Особый</span></div>
-          <div class="mode-desc" id="modeSpecialDesc">С бонусными картами</div>
-        </button>
-      </div>
 
       <div class="menu-row">
         <strong id="diffLabel">Сложность:</strong>
         <label><input type="radio" name="diff" value="easy"> <span id="diffEasy">Лёгкая</span></label>
         <label><input type="radio" name="diff" value="normal" checked> <span id="diffNormal">Обычная</span></label>
         <label><input type="radio" name="diff" value="hard"> <span id="diffHard">Сложная</span></label>
+      </div>
+
+      <div class="menu-row">
+        <strong id="winsLabel">Раундов до победы:</strong>
+        <select id="winTarget" class="spin">
+          <option value="2">2</option>
+          <option value="3" selected>3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
       </div>
 
       <div class="menu-row">
@@ -558,17 +517,6 @@
       clearStats:'Очистить статистику', clearAchievements:'Сбросить достижения',
       confirmClearStats:'Вы уверены, что хотите очистить всю статистику?',
       confirmClearAchievements:'Вы уверены, что хотите сбросить все достижения?',
-      // Game modes
-      gameMode:'Режим игры',
-      modeClassic:'Классика', modeClassicDesc:'11 карт, до 3 побед',
-      modeQuick:'Быстрый', modeQuickDesc:'7 карт, до 2 побед',
-      modeMarathon:'Марафон', modeMarathonDesc:'15 карт, до 5 побед',
-      modeSpecial:'Особый', modeSpecialDesc:'С бонусными картами',
-      // Power-ups
-      powerupJoker:'Джокер', powerupJokerDesc:'Выбери любое значение от 1 до 11',
-      powerupShield:'Щит', powerupShieldDesc:'Защита от одного перебора',
-      powerupPeek:'Взгляд', powerupPeekDesc:'Посмотри следующую карту',
-      shieldActive:'Щит активен!', shieldUsed:'Щит использован!',
       // Achievements
       achievementUnlocked:'Достижение разблокировано!',
       firstWin:'Первая победа', firstWinDesc:'Выиграй свой первый раунд',
@@ -579,8 +527,7 @@
       veteran:'Ветеран', veteranDesc:'Сыграй 50 раундов',
       lucky7:'Счастливая семёрка', lucky7Desc:'Выиграй с 7 и 7 и 7',
       noHit:'Без добора', noHitDesc:'Выиграй раунд, не взяв ни одной карты',
-      master:'Мастер', masterDesc:'Выиграй 10 матчей',
-      powerMaster:'Мастер бонусов', powerMasterDesc:'Используй все виды бонусов'
+      master:'Мастер', masterDesc:'Выиграй 10 матчей'
     },
     en:{
       score:'Score', game21:'Twenty-One', player:'Player', bot:'Bot',
@@ -605,17 +552,6 @@
       clearStats:'Clear statistics', clearAchievements:'Reset achievements',
       confirmClearStats:'Are you sure you want to clear all statistics?',
       confirmClearAchievements:'Are you sure you want to reset all achievements?',
-      // Game modes
-      gameMode:'Game mode',
-      modeClassic:'Classic', modeClassicDesc:'11 cards, best of 3',
-      modeQuick:'Quick', modeQuickDesc:'7 cards, best of 2',
-      modeMarathon:'Marathon', modeMarathonDesc:'15 cards, best of 5',
-      modeSpecial:'Special', modeSpecialDesc:'With power-up cards',
-      // Power-ups
-      powerupJoker:'Joker', powerupJokerDesc:'Choose any value from 1 to 11',
-      powerupShield:'Shield', powerupShieldDesc:'Protection from one bust',
-      powerupPeek:'Peek', powerupPeekDesc:'See the next card',
-      shieldActive:'Shield active!', shieldUsed:'Shield used!',
       // Achievements
       achievementUnlocked:'Achievement unlocked!',
       firstWin:'First Win', firstWinDesc:'Win your first round',
@@ -626,73 +562,17 @@
       veteran:'Veteran', veteranDesc:'Play 50 rounds',
       lucky7:'Lucky Seven', lucky7Desc:'Win with 7, 7, and 7',
       noHit:'No Hit Wonder', noHitDesc:'Win a round without drawing any cards',
-      master:'Master', masterDesc:'Win 10 matches',
-      powerMaster:'Power Master', powerMasterDesc:'Use all types of power-ups'
+      master:'Master', masterDesc:'Win 10 matches'
     }
   };
   
   let lang = localStorage.lang || 'ru';
+  let currentTheme = localStorage.theme || 'dark';
+  
   const t = (k, vars={})=>{
     const raw = (i18n[lang]&&i18n[lang][k]) || i18n.ru[k] || k;
     return raw.replace('{ps}', vars.ps??'').replace('{bs}', vars.bs??'');
   };
-
-  // ---------- Game Modes ----------
-  const gameModes = {
-    classic: { 
-      name: 'classic', 
-      deckSize: 11, 
-      startCards: 2, 
-      winTarget: 3,
-      specialCards: false 
-    },
-    quick: { 
-      name: 'quick', 
-      deckSize: 7, 
-      startCards: 2, 
-      winTarget: 2,
-      specialCards: false 
-    },
-    marathon: { 
-      name: 'marathon', 
-      deckSize: 15, 
-      startCards: 2, 
-      winTarget: 5,
-      specialCards: false 
-    },
-    special: { 
-      name: 'special', 
-      deckSize: 11, 
-      startCards: 2, 
-      winTarget: 3,
-      specialCards: true,
-      powerupChance: 0.15 
-    }
-  };
-
-  let currentMode = 'classic';
-
-  // ---------- Power-ups ----------
-  const powerups = {
-    joker: { 
-      icon: '🃏', 
-      effect: 'choose', 
-      rarity: 0.05 
-    },
-    shield: { 
-      icon: '🛡️', 
-      effect: 'protection', 
-      rarity: 0.05 
-    },
-    peek: { 
-      icon: '👁️', 
-      effect: 'preview', 
-      rarity: 0.05 
-    }
-  };
-
-  let activeShield = false;
-  let usedPowerups = new Set();
 
   // ---------- Enhanced Haptic Patterns ----------
   const hapticPatterns = {
@@ -701,7 +581,7 @@
     lose: [200],
     achievement: [30, 50, 30, 50, 30],
     bust: [100, 50, 100],
-    powerup: [20, 40, 20, 40, 20],
+    click: [10],
     special: [10, 20, 10, 20, 10, 20, 10]
   };
 
@@ -728,27 +608,13 @@
     document.getElementById('diffEasy').textContent   = t('easy');
     document.getElementById('diffNormal').textContent = t('normal');
     document.getElementById('diffHard').textContent   = t('hard');
+    document.getElementById('winsLabel').textContent  = t('winsToWin');
     document.getElementById('sfxLabel').textContent   = t('sound');
     document.getElementById('vibLabel').textContent   = t('vib');
-    document.getElementById('startText').textContent  = t('start');    
+    document.getElementById('startText').textContent  = t('start');
     document.getElementById('rulesText').textContent  = t('rules');
     document.getElementById('okBtn').textContent      = t('ok');
     document.getElementById('toMenuText').textContent = t('toMenu');
-    
-    // Game modes
-    document.getElementById('modeLabel').textContent = t('gameMode') + ':';
-    document.getElementById('modeClassic').textContent = t('modeClassic');
-    document.getElementById('modeClassicDesc').textContent = t('modeClassicDesc');
-    document.getElementById('modeQuick').textContent = t('modeQuick');
-    document.getElementById('modeQuickDesc').textContent = t('modeQuickDesc');
-    document.getElementById('modeMarathon').textContent = t('modeMarathon');
-    document.getElementById('modeMarathonDesc').textContent = t('modeMarathonDesc');
-    document.getElementById('modeSpecial').textContent = t('modeSpecial');
-    document.getElementById('modeSpecialDesc').textContent = t('modeSpecialDesc');
-    
-    // Update game mode badge
-    const modeBadge = document.getElementById('gameModeBadge');
-    if (modeBadge) modeBadge.textContent = t('mode' + currentMode.charAt(0).toUpperCase() + currentMode.slice(1));
     
     // Stats panel translations
     const statsTitle = document.getElementById('statsTitle');
@@ -816,8 +682,7 @@
     veteran: false,
     lucky7: false,
     noHit: false,
-    master: false,
-    powerMaster: false
+    master: false
   };
 
   // Load data
@@ -874,12 +739,10 @@
         veteran: false,
         lucky7: false,
         noHit: false,
-        master: false,
-        powerMaster: false
+        master: false
       };
-      usedPowerups.clear();
       saveAchievements();
-      displayAchievements();
+      displayAchievements();      
       showToast('🏆 ' + (lang === 'ru' ? 'Достижения сброшены' : 'Achievements reset'), 'info');
     }
   }
@@ -950,12 +813,6 @@
       newAchievement = { id: 'master', icon: '👑' };
     }
     
-    // Power Master
-    if (!achievements.powerMaster && usedPowerups.size >= 3) {
-      achievements.powerMaster = true;
-      newAchievement = { id: 'powerMaster', icon: '✨' };
-    }
-    
     if (newAchievement) {
       showAchievementNotification(newAchievement);
       saveAchievements();
@@ -1004,8 +861,7 @@
       { id: 'veteran', icon: '🎖️' },
       { id: 'lucky7', icon: '🎰' },
       { id: 'noHit', icon: '🎯' },
-      { id: 'master', icon: '👑' },
-      { id: 'powerMaster', icon: '✨' }
+      { id: 'master', icon: '👑' }
     ];
     
     achievementData.forEach(data => {
@@ -1042,31 +898,17 @@
   function playSfx(kind){
     switch(kind){
       case 'deal': tone(660,0.08,'triangle',0.03); buzzPattern('cardDeal'); break;
-      case 'click': tone(520,0.06,'square',0.04); break;
+      case 'click': tone(520,0.06,'square',0.04); buzzPattern('click'); break;
       case 'stop': tone(340,0.08,'square',0.03); break;
       case 'win': tone(880,0.12,'triangle',0.05); setTimeout(()=>tone(1046,0.14,'triangle',0.05),100); buzzPattern('win'); break;
       case 'lose': tone(220,0.18,'sawtooth',0.06); buzzPattern('lose'); break;
       case 'bust': tone(160,0.22,'sawtooth',0.06); buzzPattern('bust'); break;
       case 'streak': tone(1320,0.15,'sine',0.04); setTimeout(()=>tone(1568,0.15,'sine',0.04),100); break;
-      case 'powerup': 
-        tone(523,0.1,'sine',0.05); 
-        setTimeout(()=>tone(659,0.1,'sine',0.05),50);
-        setTimeout(()=>tone(784,0.1,'sine',0.05),100);
-        setTimeout(()=>tone(1047,0.15,'sine',0.05),150);
-        buzzPattern('powerup');
-        break;
-      case 'special':
-        for(let i = 0; i < 5; i++) {
-          setTimeout(() => tone(440 + i * 100, 0.05, 'triangle', 0.03), i * 50);
-        }
-        buzzPattern('special');
-        break;
       case 'achievement': 
         tone(1047,0.1,'sine',0.05); 
         setTimeout(()=>tone(1319,0.1,'sine',0.05),100);
         setTimeout(()=>tone(1568,0.1,'sine',0.05),200);
         setTimeout(()=>tone(2093,0.2,'sine',0.05),300);
-        buzzPattern('achievement');
         break;
     }
   }
@@ -1078,13 +920,14 @@
   const menuBtn = document.getElementById('menuBtn');
   const statsBtn = document.getElementById('statsBtn');
   const achievementsBtn = document.getElementById('achievementsBtn');
+  const winInput = document.getElementById('winTarget');
   const sfxToggle = document.getElementById('sfxToggle');
   const vibToggle = document.getElementById('vibToggle');
 
   const scoreText = document.getElementById('scoreText');
   const chipsL = document.getElementById('chipsL');
   const chipsR = document.getElementById('chipsR');
-  
+
   const cardsPlayer = document.getElementById('cardsPlayer');
   const cardsBot = document.getElementById('cardsBot');
   const totalPlayer = document.getElementById('totalPlayer');
@@ -1117,6 +960,26 @@
   const okBtn      = document.getElementById('okBtn');
   const toMenuBtn  = document.getElementById('toMenuBtn');
 
+  // Theme buttons
+  const themeBtns = document.querySelectorAll('.theme-btn');
+  themeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      themeBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentTheme = btn.dataset.theme;
+      document.body.setAttribute('data-theme', currentTheme);
+      localStorage.theme = currentTheme;
+      playSfx('click');
+    });
+  });
+
+  // Set active theme
+  document.body.setAttribute('data-theme', currentTheme);
+  themeBtns.forEach(btn => {
+    if (btn.dataset.theme === currentTheme) btn.classList.add('active');
+    else btn.classList.remove('active');
+  });
+
   // Language buttons
   const langBtns = document.querySelectorAll('.lang-btn');
   langBtns.forEach(btn => {
@@ -1137,128 +1000,38 @@
     else btn.classList.remove('active');
   });
 
-  // Game mode buttons
-  const modeBtns = document.querySelectorAll('.mode-btn');
-  modeBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      modeBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentMode = btn.dataset.mode;
-      const mode = gameModes[currentMode];
-      winTarget = mode.winTarget;
-      playSfx('click');
-    });
-  });
-
   // ---------- утилиты/колода ----------
   const rng = arr => arr[Math.floor(Math.random()*arr.length)];
   const sum = a => a.reduce((s,x)=>s+x,0);
-  
-  function newDeck() {
-    const mode = gameModes[currentMode];
-    const deck = [];
-    
-    // Add regular cards
-    for(let i = 1; i <= mode.deckSize; i++) {
-      deck.push(i);
-    }
-    
-    // Add special cards for special mode
-    if (mode.specialCards && Math.random() < mode.powerupChance) {
-      const powerupType = rng(Object.keys(powerups));
-      deck.push({ type: 'special', powerup: powerupType, value: 0 });
-    }
-    
-    return deck;
-  }
+  const newDeck = () => Array.from({length:11}, (_,i)=>i+1);
 
   function dealStart(d){
     let tries=0;
     while(true){
       const a = rng(d), b = rng(d);
-      if(typeof a === 'number' && typeof b === 'number' && a!==b && a+b<=11){
+      if(a!==b && a+b<=11){
         d.splice(d.indexOf(a),1);
         d.splice(d.indexOf(b),1);
         return [a,b];
       }
       if(++tries>200){
-        return [getCard(d), getCard(d)].filter(c => c !== null);
+        return [getCard(d), getCard(d)];
       }
     }
   }
-  
   function getCard(d){
     if(d.length===0) return null;
     const i = Math.floor(Math.random()*d.length);
     return d.splice(i,1)[0];
   }
 
-  // Handle special cards
-  function handleSpecialCard(card, owner) {
-    if (typeof card !== 'object' || !card.powerup) return card;
-    
-    const powerup = powerups[card.powerup];
-    usedPowerups.add(card.powerup);
-    
-    // Show powerup notification
-    const notification = document.createElement('div');
-    notification.className = 'powerup-notification';
-    notification.innerHTML = `
-      ${powerup.icon} ${t('powerup' + card.powerup.charAt(0).toUpperCase() + card.powerup.slice(1))}<br>
-      <small>${t('powerup' + card.powerup.charAt(0).toUpperCase() + card.powerup.slice(1) + 'Desc')}</small>
-    `;
-    document.getElementById('table').appendChild(notification);
-    
-    playSfx('powerup');
-    
-    setTimeout(() => {
-      notification.style.opacity = '0';
-      setTimeout(() => notification.remove(), 500);
-    }, 2000);
-    
-    switch(card.powerup) {
-      case 'joker':
-        // For player, let them choose; for bot, pick optimal value
-        if (owner === 'player') {
-          const value = prompt(t('powerupJokerDesc'), '5');
-          const num = parseInt(value);
-          if (num >= 1 && num <= 11) {
-            return num;
-          }
-        } else {
-          // Bot chooses optimal value
-          const currentTotal = sum(bot);
-          const optimal = Math.min(11, 21 - currentTotal);
-          return optimal;
-        }
-        return 5; // Default
-        
-      case 'shield':
-        if (owner === 'player') {
-          activeShield = true;
-          showToast('🛡️ ' + t('shieldActive'), 'powerup');
-        }
-        return 1; // Shield card counts as 1
-        
-      case 'peek':
-        if (owner === 'player' && deck.length > 0) {
-          const nextCard = deck[0];
-          const cardValue = typeof nextCard === 'object' ? '?' : nextCard;
-          showToast(`👁️ ${lang === 'ru' ? 'Следующая карта:' : 'Next card:'} ${cardValue}`, 'powerup', 2000);
-        }
-        return 2; // Peek card counts as 2
-    }
-    
-    return 5; // Fallback
-  }
-
   // Enhanced bot logic
   function getSeenCards() {
-    return [...player, ...bot].filter(c => typeof c === 'number');
+    return [...player, ...bot];
   }
 
   function adjustedBustProb(total, deck, seenCards) {
-    const remainingDeck = [...deck].filter(c => typeof c === 'number');
+    const remainingDeck = [...deck];
     seenCards.forEach(card => {
       const idx = remainingDeck.indexOf(card);
       if(idx > -1) remainingDeck.splice(idx, 1);
@@ -1267,11 +1040,10 @@
   }
 
   function bustProb(total, d){
-    const numericCards = d.filter(c => typeof c === 'number');
     const need = 22 - total;
     if(need<=1) return 1;
-    const bad = numericCards.filter(v=>v>=need).length;
-    return numericCards.length ? bad/numericCards.length : 1;
+    const bad = d.filter(v=>v>=need).length;
+    return d.length ? bad/d.length : 1;
   }
 
   function botDecision(total, d, playerTotal = null){
@@ -1312,31 +1084,14 @@
   function suitFor(value){ return SUITS[(value-1)%4]; }
 
   function makeCardEl(value, owner){
-    const card = document.createElement('div');
-    
-    if (typeof value === 'object' && value.powerup) {
-      // Special card
-      const powerup = powerups[value.powerup];
-      card.className = 'card special enter dealing';
-      card.innerHTML = `
-        <div class="corner tl">${powerup.icon}</div>
-        <div class="value">${powerup.icon}</div>
-        <div class="corner br">${powerup.icon}</div>
-      `;
-      if (value.powerup === 'shield' && owner === 'player' && activeShield) {
-        card.classList.add('shield');
-      }
-    } else {
-      // Regular card
-      const s = suitFor(value);
-      card.className = 'card ' + (owner==='player' ? '' : 'grey') + ' ' + (s.color==='red'?'red':'black') + ' enter dealing';
-      card.innerHTML = `
-        <div class="corner tl">${s.sym}</div>
-        <div class="value">${value}</div>
-        <div class="corner br">${s.sym}</div>
-      `;
-    }
-    
+    const s = suitFor(value);
+    const card = document.createElement('div');    
+    card.className = 'card ' + (owner==='player' ? '' : 'grey') + ' ' + (s.color==='red'?'red':'black') + ' enter dealing';
+    card.innerHTML = `
+      <div class="corner tl">${s.sym}</div>
+      <div class="value">${value}</div>
+      <div class="corner br">${s.sym}</div>
+    `;
     requestAnimationFrame(()=>{
       card.classList.remove('enter');
       setTimeout(()=>card.classList.remove('dealing'), 400);
@@ -1346,8 +1101,7 @@
 
   function cls(t){ return t>21?'bad':t===21?'win':t>=17?'good':'' }
   function renderTotals(){
-    const pt = sum(player.map(c => typeof c === 'number' ? c : c.value || 0));
-    const bt = sum(bot.map(c => typeof c === 'number' ? c : c.value || 0));
+    const pt = sum(player), bt = sum(bot);
     totalPlayer.innerHTML = `<span class="badge ${cls(pt)}">= ${pt}</span>`;
     totalBot.innerHTML    = `<span class="badge ${cls(bt)}">= ${bt}</span>`;
   }
@@ -1379,21 +1133,13 @@
       const el = makeCardEl(value, owner);
       cont.appendChild(el);
       el.classList.add('flash');
-      
-      const displayValue = typeof value === 'object' ? powerups[value.powerup].icon : value;
       const pill = document.createElement('span');
-      pill.className='pill'; 
-      pill.textContent = typeof value === 'object' ? '' : `+${value}`;
+      pill.className='pill'; pill.textContent = `+${value}`;
       el.appendChild(pill);
       setTimeout(()=>{ el.classList.remove('flash'); pill.remove(); }, 450);
 
       renderTotals();
-      
-      if (typeof value === 'object') {
-        playSfx('special');
-      } else {
-        playSfx('deal');
-      }
+      playSfx('deal');
     }, 340);
   }
 
@@ -1445,9 +1191,6 @@
   function drawChips(){
     scoreText.textContent = (lang==='ru' ? `Ты ${playerScore} - ${botScore} Бот`
                                           : `You ${playerScore} - ${botScore} Bot`);
-    const mode = gameModes[currentMode];
-    winTarget = mode.winTarget;
-    
     const draw = (el, n, activeClass) => {
       el.innerHTML = '';
       for(let i=0;i<winTarget;i++){
@@ -1460,23 +1203,24 @@
     draw(chipsR, botScore, 'red');
   }
 
+  // ---------- валидатор цели матча ----------
+  function ensureWinTarget(){
+    const v = parseInt(winInput.value, 10);
+    winTarget = [2,3,4,5].includes(v) ? v : 3;
+    winInput.value = String(winTarget);
+    winInput.addEventListener('change', ()=>{ ensureWinTarget(); drawChips(); });
+  }
+
   // ---------- раунд ----------
   function startRound(){
-    deck = newDeck();    
-    const startCards = dealStart(deck);
-    player = startCards.slice(0, 2);
+    deck = newDeck();
+    player = dealStart(deck);
     bot = dealStart(deck);
     playerStop = botStop = roundOver = false;
     phase = 'player';
     animLock = false;
-    activeShield = false;
 
     cardsPlayer.innerHTML = ''; cardsBot.innerHTML='';
-    
-    // Handle initial special cards
-    player = player.map(c => handleSpecialCard(c, 'player'));
-    bot = bot.map(c => handleSpecialCard(c, 'bot'));
-    
     player.forEach(v=>cardsPlayer.appendChild(makeCardEl(v,'player')));
     bot.forEach(v=>cardsBot.appendChild(makeCardEl(v,'bot')));
     renderTotals();
@@ -1493,8 +1237,7 @@
 
   function checkEnd(){
     if(playerStop && botStop && !roundOver){
-      const ps = sum(player.map(c => typeof c === 'number' ? c : c.value || 0));
-      const bs = sum(bot.map(c => typeof c === 'number' ? c : c.value || 0));
+      const ps = sum(player), bs = sum(bot);
       if(ps>bs){ endRound('player'); }
       else if(ps<bs){ endRound('bot'); }
       else { endRound('draw'); }
@@ -1519,8 +1262,7 @@
 
     // Update statistics
     stats.totalRounds++;
-    const ps = sum(player.map(c => typeof c === 'number' ? c : c.value || 0));
-    const bs = sum(bot.map(c => typeof c === 'number' ? c : c.value || 0));
+    const ps = sum(player), bs = sum(bot);
     
     if(ps <= 21) {
       stats.totalPlayerHands += ps;
@@ -1569,9 +1311,10 @@
       if(chip){ chip.classList.add('win'); chip.title = `Round: ${ps}:${bs}`; }
     }
 
+    ensureWinTarget();
+
     // конец матча — с паузой
-    const mode = gameModes[currentMode];
-    if (playerScore >= mode.winTarget || botScore >= mode.winTarget) {
+    if (playerScore >= winTarget || botScore >= winTarget) {
       if (playerScore > botScore) {
         matchesWon++;
         saveStats();
@@ -1598,31 +1341,18 @@
   // ---------- ходы ----------
   function onHit(){
     if(roundOver || phase!=='player' || playerStop || animLock) return;
-    let card = getCard(deck);
+    const card = getCard(deck);
     if(card==null){
       showToast(t('deckEmptyYou'),'info');
       playerStop = true; bubble('player','—');
       return switchToBot();
     }
-    
     animLock = true;
-    card = handleSpecialCard(card, 'player');
     player.push(card);
     addCardToDOM('player', card);
 
-    const total = sum(player.map(c => typeof c === 'number' ? c : c.value || 0));
+    const total = sum(player);
     if(total>21){
-      if (activeShield) {
-        activeShield = false;
-        showToast('🛡️ ' + t('shieldUsed'), 'powerup');
-        // Remove the last card
-        player.pop();
-        cardsPlayer.lastChild.remove();
-        renderTotals();
-        animLock = false;
-        return;
-      }
-      
       stats.playerBusts++;
       showToast(t('youBust'),'lose', 1400);
       playSfx('bust');
@@ -1668,28 +1398,26 @@
 
   function botStep(){
     if(roundOver || animLock) return setTimeout(botStep, 150);
-    const bsum = sum(bot.map(c => typeof c === 'number' ? c : c.value || 0));
+    const bsum = sum(bot);
     if(bsum>=21){
       if(!botStop){ botStop = true; bubble('bot','21'); }
       return afterBot();
     }
     
-    const playerTotal = playerStop ? sum(player.map(c => typeof c === 'number' ? c : c.value || 0)) : null;
+    const playerTotal = playerStop ? sum(player) : null;
     const decision = botDecision(bsum, deck, playerTotal);
     
     if(decision==='hit'){
-      let card = getCard(deck);
+      const card = getCard(deck);
       if(card==null){
         showToast(t('deckEmptyBot'),'info');
         botStop = true;
         return afterBot();
       }
       animLock = true;
-      card = handleSpecialCard(card, 'bot');
       bot.push(card);
       addCardToDOM('bot', card);
-      const newTotal = sum(bot.map(c => typeof c === 'number' ? c : c.value || 0));
-      if(newTotal>21){
+      if(sum(bot)>21){
         stats.botBusts++;
         showToast(t('botBust'),'win', 1400);
         playSfx('bust');
@@ -1710,18 +1438,13 @@
   // ---------- меню / матч ----------
   function startMatch(){
     difficulty = document.querySelector('input[name="diff"]:checked')?.value || 'normal';
-    const mode = gameModes[currentMode];
-    winTarget = mode.winTarget;
+    ensureWinTarget();
     playerScore=0; botScore=0;
     stats.currentStreak = 0;
     streakIndicator.classList.remove('show');
     drawChips();
     hideMatchEndModal();
     menuOverlay.style.display='none';
-    
-    // Update game mode badge
-    document.getElementById('gameModeBadge').textContent = t('mode' + currentMode.charAt(0).toUpperCase() + currentMode.slice(1));
-    
     startRound();
   }
 
@@ -1745,18 +1468,13 @@
   }
 
   function showRules(){
-    const modeRules = currentMode === 'special' ? 
-      `\n${lang==='ru'?'🃏 Джокер - выбери значение':'🃏 Joker - choose value'}
-${lang==='ru'?'🛡️ Щит - защита от перебора':'🛡️ Shield - bust protection'}
-${lang==='ru'?'👁️ Взгляд - посмотри следующую карту':'👁️ Peek - see next card'}` : '';
-    
     alert(
 `${t('rules')}
 
 — ${lang==='ru'?'В начале по 2 карты.':'Start with 2 cards.'}
 — ${lang==='ru'?'Твой ход первый: «Взять» или «Стоп».':'You move first: Hit or Stand.'}
 — ${lang==='ru'?'Перебор мгновенно завершает раунд.':'Bust ends the round immediately.'}
-— ${lang==='ru'?`Матч до ${winTarget} побед.`:`Match to ${winTarget} wins.`}${modeRules}
+— ${lang==='ru'?'Матч до N побед (макс. 5).':'Match to N wins (max 5).'}
 
 ${lang==='ru'?'Горячие клавиши:':'Keyboard shortcuts:'}
 [H] - ${lang==='ru'?'Взять карту':'Hit'}
