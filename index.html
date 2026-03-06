@@ -1296,6 +1296,7 @@
 
   function checkEnd(){
     if(playerStop && botStop && !roundOver){
+      roundOver = true;
       // Reveal bot's face-down card
       const facedownCard = cardsBot.querySelector('.facedown');
       if (facedownCard) {
@@ -1428,6 +1429,7 @@
       showToast(t('youBust'),'lose', 1400);
       playSfx('bust');
       animLock = false;
+      roundOver = true;
       
       // Reveal bot's card on player bust
       const facedownCard = cardsBot.querySelector('.facedown');
@@ -1504,6 +1506,7 @@
         showToast(t('botBust'),'win', 1400);
         playSfx('bust');
         animLock=false;
+        roundOver = true;
         
         // Reveal bot's face-down card on bust
         const facedownCard = cardsBot.querySelector('.facedown');
@@ -1688,3 +1691,4 @@ ${lang==='ru'?'Горячие клавиши:':'Keyboard shortcuts:'}
 </body>
 </html>
         
+
