@@ -682,6 +682,7 @@
   let playerScore = 0;
   let botScore = 0;
   let matchesWon = 0;
+  let moveDelay = 2000; // 2 second delay between moves
 
   // Statistics tracking
   let stats = {
@@ -1124,6 +1125,7 @@
       cardEl.classList.remove('facedown');
       cardEl.innerHTML = `
         <div class="corner tl">${s.sym}</div>
+        <div class="value">${value}</div>
         <div class="corner br">${s.sym}</div>
       `;
       playSfx('reveal');
@@ -1131,6 +1133,7 @@
     
     setTimeout(() => {
       cardEl.classList.remove('revealing');
+      renderTotals(); // Update totals after reveal
     }, 500);
   }
 
@@ -1437,7 +1440,9 @@
     if(total===21){ playerStop = true; bubble('player','21'); }
 
     animLock = false;
-    switchToBot();
+    
+    // Add 2 second delay before switching to bot
+    setTimeout(() => switchToBot(), moveDelay);
   }
 
   function onStop(){
@@ -1446,7 +1451,9 @@
     bubble('player', lang==='ru'?'Стоп':'Stand');
     showToast(t('youSaidStop'),'info');
     playSfx('stop');
-    switchToBot();
+    
+    // Add 2 second delay before switching to bot
+    setTimeout(() => switchToBot(), moveDelay);
   }
 
   function switchToBot(){
@@ -1462,7 +1469,7 @@
     document.getElementById('handBot').classList.remove('thinking');
     if(checkEnd()) return;
     if(playerStop && !botStop){
-      setTimeout(botStep, 800);
+      setTimeout(botStep, moveDelay); // 2 second delay between bot moves
     }else{
       phase='player';
       statusEl.textContent = t('yourTurn');
@@ -1558,6 +1565,7 @@
 — ${lang==='ru'?'Первая карта бота скрыта до конца раунда.':'Bot\'s first card is hidden until round ends.'}
 — ${lang==='ru'?'Перебор мгновенно завершает раунд.':'Bust ends the round immediately.'}
 — ${lang==='ru'?'Матч до N побед (макс. 5).':'Match to N wins (max 5).'}
+— ${lang==='ru'?'Пауза 2 секунды между ходами.':'2 second delay between moves.'}
 
 ${lang==='ru'?'Горячие клавиши:':'Keyboard shortcuts:'}
 [H] - ${lang==='ru'?'Взять карту':'Hit'}
@@ -1679,3 +1687,4 @@ ${lang==='ru'?'Горячие клавиши:':'Keyboard shortcuts:'}
 </script>
 </body>
 </html>
+        
