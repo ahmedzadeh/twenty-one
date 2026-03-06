@@ -1324,7 +1324,6 @@
   function hideMatchEndModal(){ resultOverlay.style.display = 'none'; }
 
   function endRound(winner, { silent=false } = {}){
-    if (roundOver) return;
 
     hitBtn.disabled = true; stopBtn.disabled = true;
 
@@ -1690,5 +1689,6 @@ ${lang==='ru'?'Горячие клавиши:':'Keyboard shortcuts:'}
 </body>
 </html>
         
+
 
 
